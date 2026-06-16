@@ -11,6 +11,7 @@ import {
 import { AcademicManagement } from "./academic-management";
 import { CreateUserForm } from "./create-user-form";
 import { UserManagement } from "./user-management";
+import { ImportCsvButton } from "@/components/import-csv-button";
 
 export default async function AdminPage() {
   const [currentUser, stats, overview, users, academicOptions] = await Promise.all([
@@ -68,7 +69,24 @@ export default async function AdminPage() {
         ))}
       </section>
       <div className="mt-6 grid gap-6">
-        <CreateUserForm universityId={currentUser?.universityId ?? ""} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex items-center gap-3 rounded-xl border border-line bg-brand-50 px-4 py-3">
+            <div>
+              <p className="text-xs font-bold text-brand-600">Option 1 — Lien d'invitation</p>
+              <p className="text-[11px] text-muted mt-0.5">Le prof partage un lien WhatsApp, les étudiants s'inscrivent eux-mêmes</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl border border-line bg-slate-50 px-4 py-3">
+            <div>
+              <p className="text-xs font-bold text-ink">Option 2 — Import CSV</p>
+              <p className="text-[11px] text-muted mt-0.5">L'admin importe une liste Excel, tous les comptes créés en 1 clic</p>
+            </div>
+          </div>
+        </div>
+        <div className="grid gap-6 xl:grid-cols-2">
+          <CreateUserForm universityId={currentUser?.universityId ?? ""} />
+          <ImportCsvButton defaultRole="student" />
+        </div>
         <AcademicManagement options={academicOptions} />
         <UserManagement users={users} />
       </div>

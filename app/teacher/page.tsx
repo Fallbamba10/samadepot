@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { getAcademicOptions, getSpaceTracking, getSpaces, getSubmissions } from "@/lib/data";
 import { CreateSpaceWizard } from "./create-space-wizard";
 import { ReviewForm } from "./review-form";
+import { InviteClassButton } from "@/components/invite-class-button";
 import { cn } from "@/lib/utils";
 import type { SubmissionSpace } from "@/types";
 
@@ -97,7 +98,7 @@ export default async function TeacherPage() {
 
   return (
     <AppShell active="Professeur">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-ink">Espace professeur</h1>
           <p className="mt-1 text-sm text-muted">
@@ -106,6 +107,9 @@ export default async function TeacherPage() {
               : "Tout est à jour — aucun dépôt en attente"}
           </p>
         </div>
+        {academicOptions.classes.length > 0 && (
+          <InviteClassButton classes={academicOptions.classes} />
+        )}
       </div>
 
       {/* KPIs */}
