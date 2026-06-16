@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/spaces", "/submissions", "/teacher", "/admin", "/notifications"];
+const protectedRoutes = ["/dashboard", "/spaces", "/submissions", "/teacher", "/admin", "/notifications", "/superadmin"];
 
 type CookieToSet = {
   name: string;
@@ -99,5 +99,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/spaces/:path*", "/submissions/:path*", "/teacher/:path*", "/admin/:path*", "/notifications/:path*"]
+  matcher: ["/dashboard/:path*", "/spaces/:path*", "/submissions/:path*", "/teacher/:path*", "/admin/:path*", "/notifications/:path*", "/superadmin/:path*"]
 };

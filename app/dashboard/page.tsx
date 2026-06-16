@@ -5,6 +5,7 @@ import { SpaceCard } from "@/components/space-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getCurrentUser } from "@/lib/auth";
 import { getSpaces, getSubmissions } from "@/lib/data";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   const [currentUser, spaces, submissions] = await Promise.all([
@@ -13,9 +14,15 @@ export default async function DashboardPage() {
     getSubmissions()
   ]);
 
+  if (currentUser?.role === "superadmin") {
+    redirect("/superadmin");
+  }
+
+  const role = currentUser?.role ?? "student";
   const firstName = currentUser?.fullName?.split(" ")[0] ?? "Étudiant";
   const openSpaces = spaces.filter((s) => s.status !== "expired");
   const mySubmissions = submissions.slice(0, 5);
+  const spaceMode = role === "student" ? "student" : "teacher";
 
   return (
     <AppShell active="Dashboard">
@@ -61,7 +68,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {openSpaces.slice(0, 3).map((space) => (
-              <SpaceCard key={space.id} space={space} />
+              <SpaceCard key={space.id} space={space} mode={spaceMode} />
             ))}
           </div>
         )}

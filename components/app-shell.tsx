@@ -15,11 +15,13 @@ import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/notification-bell";
 
 const allNavItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["student", "teacher", "admin", "superadmin"] },
-  { label: "Espaces", href: "/spaces", icon: BookOpenCheck, roles: ["student", "teacher", "admin", "superadmin"] },
-  { label: "Depots", href: "/submissions", icon: UploadCloud, roles: ["student", "teacher", "admin", "superadmin"] },
-  { label: "Professeur", href: "/teacher", icon: FileCheck2, roles: ["teacher", "admin", "superadmin"] },
-  { label: "Admin", href: "/admin", icon: Building2, roles: ["admin", "superadmin"] }
+  { label: "Dashboard", href: "/superadmin", icon: LayoutDashboard, roles: ["superadmin"] },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["student", "teacher", "admin"] },
+  { label: "Espaces", href: "/spaces", icon: BookOpenCheck, roles: ["student", "teacher", "admin"] },
+  { label: "Depots", href: "/submissions", icon: UploadCloud, roles: ["student", "teacher", "admin"] },
+  { label: "Professeur", href: "/teacher", icon: FileCheck2, roles: ["teacher", "admin"] },
+  { label: "Admin", href: "/admin", icon: Building2, roles: ["admin", "superadmin"] },
+  { label: "Universites", href: "/superadmin", icon: Building2, roles: ["superadmin"] }
 ] as const;
 
 export async function AppShell({
