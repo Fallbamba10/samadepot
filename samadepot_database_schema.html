@@ -1,0 +1,632 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1B7F4A;--gl:#E8F5EE;--gm:#2EA65A;--gd:#0D3B24;
+  --dark:#0D1117;--mid:#374151;--muted:#6B7280;
+  --border:#D1FAE5;--light:#F0FDF4;--white:#fff;
+  --amber:#D97706;--ambl:#FEF3C7;
+  --blue:#1D4ED8;--bluel:#EFF6FF;
+  --purple:#7C3AED;--purplel:#F5F3FF;
+  --red:#DC2626;--redl:#FEF2F2;
+}
+body{font-family:var(--font-sans);background:var(--color-background-primary);color:var(--dark);font-size:13px}
+
+.header{background:var(--gd);color:#fff;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.header-title{font-size:16px;font-weight:500;color:#6EE7B7}
+.header-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+.header-badge{background:rgba(110,231,183,0.15);border:1px solid rgba(110,231,183,0.3);color:#6EE7B7;font-size:10px;font-weight:600;padding:3px 10px;border-radius:999px;letter-spacing:.5px}
+
+.tabs{display:flex;border-bottom:1px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+.tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab.active{color:var(--g);border-bottom-color:var(--g);background:var(--color-background-primary)}
+.tab:hover:not(.active){color:var(--color-text-primary)}
+
+.content{padding:1.25rem 1.5rem}
+
+/* Tables BDD */
+.tables-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.db-table{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:8px;overflow:hidden}
+.db-table-header{padding:8px 12px;display:flex;align-items:center;justify-content:space-between}
+.db-table-name{font-size:12px;font-weight:700;letter-spacing:.5px}
+.db-table-count{font-size:10px;font-weight:500;padding:2px 7px;border-radius:999px}
+.db-fields{border-top:1px solid var(--color-border-tertiary)}
+.db-field{display:grid;grid-template-columns:28px 1fr 80px 60px;align-items:center;padding:5px 10px;border-bottom:1px solid var(--color-border-tertiary);font-size:11px}
+.db-field:last-child{border-bottom:none}
+.db-field:hover{background:var(--color-background-secondary)}
+.field-pk{width:18px;height:18px;background:var(--ambl);border:1px solid var(--amber);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--amber)}
+.field-fk{width:18px;height:18px;background:var(--bluel);border:1px solid var(--blue);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--blue)}
+.field-dot{width:8px;height:8px;border-radius:50%;background:var(--color-border-tertiary)}
+.field-name{font-weight:500;color:var(--color-text-primary)}
+.field-name.pk{color:var(--amber)}
+.field-name.fk{color:var(--blue)}
+.field-type{font-size:10px;color:var(--muted);font-family:monospace}
+.field-constraint{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:600;text-align:center}
+.fc-pk{background:var(--ambl);color:var(--amber)}
+.fc-nn{background:var(--light);color:var(--g)}
+.fc-null{background:var(--color-background-secondary);color:var(--muted)}
+.fc-uniq{background:var(--purplel);color:var(--purple)}
+
+/* Rôles */
+.roles-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.role-card{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:8px;overflow:hidden}
+.role-header{padding:10px 14px;display:flex;align-items:center;gap:10px}
+.role-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.role-name{font-size:13px;font-weight:600;color:var(--color-text-primary)}
+.role-desc{font-size:11px;color:var(--muted);margin-top:1px}
+.role-perms{padding:10px 14px;border-top:1px solid var(--color-border-tertiary);display:flex;flex-direction:column;gap:5px}
+.perm{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mid)}
+.perm-icon{font-size:11px;width:16px;text-align:center;flex-shrink:0}
+
+/* Flux */
+.flow-section{display:flex;flex-direction:column;gap:10px}
+.flow-step{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:flex-start}
+.flow-num{width:32px;height:32px;border-radius:50%;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px}
+.flow-body{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:8px;padding:10px 14px}
+.flow-title{font-size:13px;font-weight:600;color:var(--color-text-primary);margin-bottom:4px}
+.flow-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.flow-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.ftag{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500}
+.ftag-g{background:var(--gl);color:var(--g)}
+.ftag-b{background:var(--bluel);color:var(--blue)}
+.ftag-a{background:var(--ambl);color:var(--amber)}
+.ftag-p{background:var(--purplel);color:var(--purple)}
+
+/* Architecture dossiers */
+.folder-tree{font-family:monospace;font-size:12px;line-height:1.7;color:var(--color-text-primary);background:var(--color-background-secondary);border-radius:8px;padding:1rem;border:1px solid var(--color-border-tertiary)}
+.f-dir{color:var(--g);font-weight:600}
+.f-file{color:var(--mid)}
+.f-comment{color:var(--muted);font-style:italic}
+.f-indent-1{padding-left:16px}
+.f-indent-2{padding-left:32px}
+.f-indent-3{padding-left:48px}
+.f-indent-4{padding-left:64px}
+
+/* Phases */
+.phases{display:flex;flex-direction:column;gap:10px}
+.phase{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:8px;overflow:hidden}
+.phase-header{display:flex;align-items:center;gap:12px;padding:10px 14px}
+.phase-num{width:28px;height:28px;border-radius:50%;background:var(--g);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.phase-info{flex:1}
+.phase-name{font-size:13px;font-weight:600;color:var(--color-text-primary)}
+.phase-duration{font-size:11px;color:var(--muted);margin-top:1px}
+.phase-status{font-size:10px;font-weight:600;padding:3px 10px;border-radius:999px}
+.ps-todo{background:var(--ambl);color:var(--amber)}
+.ps-v1{background:var(--gl);color:var(--g)}
+.phase-items{padding:8px 14px 12px 54px;border-top:1px solid var(--color-border-tertiary);display:flex;flex-direction:column;gap:4px}
+.pi{font-size:11px;color:var(--mid);display:flex;align-items:flex-start;gap:6px;line-height:1.4}
+.pi::before{content:'→';color:var(--g);font-weight:600;flex-shrink:0;margin-top:1px}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;padding:8px 12px;background:var(--color-background-secondary);border-radius:6px;border:1px solid var(--color-border-tertiary)}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+</style>
+
+<div class="header">
+  <div>
+    <div class="header-title">SamaDepot — Architecture complète du projet</div>
+    <div class="header-sub">Base de données · Rôles · Flux · Structure · Planning</div>
+  </div>
+  <div class="header-badge">Multi-tenant · Next.js + Supabase</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('bdd',this)">🗄️ Base de données</div>
+  <div class="tab" onclick="showTab('roles',this)">👥 Rôles & permissions</div>
+  <div class="tab" onclick="showTab('flux',this)">🔄 Flux principaux</div>
+  <div class="tab" onclick="showTab('structure',this)">📁 Structure projet</div>
+  <div class="tab" onclick="showTab('planning',this)">📅 Planning</div>
+</div>
+
+<!-- BDD -->
+<div id="tab-bdd" class="content">
+  <div class="legend">
+    <div class="legend-item"><div class="field-pk">PK</div> Clé primaire</div>
+    <div class="legend-item"><div class="field-fk">FK</div> Clé étrangère</div>
+    <div class="legend-item"><span style="font-size:10px;padding:1px 5px;border-radius:3px;background:#FEF3C7;color:#D97706;font-weight:600">PK</span> NOT NULL</div>
+    <div class="legend-item"><span style="font-size:10px;padding:1px 5px;border-radius:3px;background:#F0FDF4;color:#1B7F4A;font-weight:600">NN</span> Requis</div>
+    <div class="legend-item"><span style="font-size:10px;padding:1px 5px;border-radius:3px;background:#F5F3FF;color:#7C3AED;font-weight:600">UQ</span> Unique</div>
+  </div>
+  <div class="tables-grid">
+
+    <!-- universities -->
+    <div class="db-table">
+      <div class="db-table-header" style="background:#E8F5EE">
+        <div class="db-table-name" style="color:#1B7F4A">🏫 universities</div>
+        <div class="db-table-count" style="background:#D1FAE5;color:#1B7F4A">Multi-tenant root</div>
+      </div>
+      <div class="db-fields">
+        <div class="db-field"><div class="field-pk">PK</div><div class="field-name pk">id</div><div class="field-type">uuid</div><div class="field-constraint fc-pk">PK</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">name</div><div class="field-type">varchar(150)</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">slug</div><div class="field-type">varchar(60)</div><div class="field-constraint fc-uniq">UQ</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">email_domain</div><div class="field-type">varchar(100)</div><div class="field-constraint fc-uniq">UQ</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">logo_url</div><div class="field-type">text</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">plan</div><div class="field-type">enum</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">is_active</div><div class="field-type">boolean</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">created_at</div><div class="field-type">timestamptz</div><div class="field-constraint fc-nn">NN</div></div>
+      </div>
+    </div>
+
+    <!-- users -->
+    <div class="db-table">
+      <div class="db-table-header" style="background:#EFF6FF">
+        <div class="db-table-name" style="color:#1D4ED8">👤 users</div>
+        <div class="db-table-count" style="background:#DBEAFE;color:#1D4ED8">Tous les comptes</div>
+      </div>
+      <div class="db-fields">
+        <div class="db-field"><div class="field-pk">PK</div><div class="field-name pk">id</div><div class="field-type">uuid</div><div class="field-constraint fc-pk">PK</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">university_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">email</div><div class="field-type">varchar(150)</div><div class="field-constraint fc-uniq">UQ</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">full_name</div><div class="field-type">varchar(100)</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">role</div><div class="field-type">enum</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">phone</div><div class="field-type">varchar(20)</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">student_id</div><div class="field-type">varchar(30)</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">is_active</div><div class="field-type">boolean</div><div class="field-constraint fc-nn">NN</div></div>
+      </div>
+    </div>
+
+    <!-- departments -->
+    <div class="db-table">
+      <div class="db-table-header" style="background:#F5F3FF">
+        <div class="db-table-name" style="color:#7C3AED">🏛️ departments</div>
+        <div class="db-table-count" style="background:#EDE9FE;color:#7C3AED">Filières / Départements</div>
+      </div>
+      <div class="db-fields">
+        <div class="db-field"><div class="field-pk">PK</div><div class="field-name pk">id</div><div class="field-type">uuid</div><div class="field-constraint fc-pk">PK</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">university_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">name</div><div class="field-type">varchar(100)</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">code</div><div class="field-type">varchar(20)</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">level</div><div class="field-type">varchar(20)</div><div class="field-constraint fc-nn">NN</div></div>
+      </div>
+    </div>
+
+    <!-- submission_spaces -->
+    <div class="db-table">
+      <div class="db-table-header" style="background:#FEF3C7">
+        <div class="db-table-name" style="color:#D97706">📋 submission_spaces</div>
+        <div class="db-table-count" style="background:#FDE68A;color:#92400E">Créé par le prof</div>
+      </div>
+      <div class="db-fields">
+        <div class="db-field"><div class="field-pk">PK</div><div class="field-name pk">id</div><div class="field-type">uuid</div><div class="field-constraint fc-pk">PK</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">university_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">teacher_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">department_id</div><div class="field-type">uuid</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">title</div><div class="field-type">varchar(200)</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">type</div><div class="field-type">enum</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">deadline</div><div class="field-type">timestamptz</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">formats_allowed</div><div class="field-type">text[]</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">max_size_mb</div><div class="field-type">integer</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">is_active</div><div class="field-type">boolean</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">access_code</div><div class="field-type">varchar(8)</div><div class="field-constraint fc-uniq">UQ</div></div>
+      </div>
+    </div>
+
+    <!-- submissions -->
+    <div class="db-table">
+      <div class="db-table-header" style="background:#E8F5EE">
+        <div class="db-table-name" style="color:#1B7F4A">📁 submissions</div>
+        <div class="db-table-count" style="background:#D1FAE5;color:#1B7F4A">❤️ Table centrale</div>
+      </div>
+      <div class="db-fields">
+        <div class="db-field"><div class="field-pk">PK</div><div class="field-name pk">id</div><div class="field-type">uuid</div><div class="field-constraint fc-pk">PK</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">space_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">student_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">university_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">file_name</div><div class="field-type">varchar(255)</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">file_url</div><div class="field-type">text</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">file_size_mb</div><div class="field-type">decimal</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">file_hash</div><div class="field-type">varchar(64)</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">status</div><div class="field-type">enum</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">is_late</div><div class="field-type">boolean</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">submitted_at</div><div class="field-type">timestamptz</div><div class="field-constraint fc-nn">NN</div></div>
+      </div>
+    </div>
+
+    <!-- reviews -->
+    <div class="db-table">
+      <div class="db-table-header" style="background:#FEF2F2">
+        <div class="db-table-name" style="color:#DC2626">✅ reviews</div>
+        <div class="db-table-count" style="background:#FEE2E2;color:#991B1B">Retour du prof</div>
+      </div>
+      <div class="db-fields">
+        <div class="db-field"><div class="field-pk">PK</div><div class="field-name pk">id</div><div class="field-type">uuid</div><div class="field-constraint fc-pk">PK</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">submission_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">teacher_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">decision</div><div class="field-type">enum</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">grade</div><div class="field-type">decimal(4,2)</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">comment</div><div class="field-type">text</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">reviewed_at</div><div class="field-type">timestamptz</div><div class="field-constraint fc-nn">NN</div></div>
+      </div>
+    </div>
+
+    <!-- notifications -->
+    <div class="db-table">
+      <div class="db-table-header" style="background:#F5F3FF">
+        <div class="db-table-name" style="color:#7C3AED">🔔 notifications</div>
+        <div class="db-table-count" style="background:#EDE9FE;color:#7C3AED">WhatsApp / Email</div>
+      </div>
+      <div class="db-fields">
+        <div class="db-field"><div class="field-pk">PK</div><div class="field-name pk">id</div><div class="field-type">uuid</div><div class="field-constraint fc-pk">PK</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">user_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">submission_id</div><div class="field-type">uuid</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">type</div><div class="field-type">enum</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">channel</div><div class="field-type">enum</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">content</div><div class="field-type">text</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">sent_at</div><div class="field-type">timestamptz</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">read_at</div><div class="field-type">timestamptz</div><div class="field-constraint fc-null">NULL</div></div>
+      </div>
+    </div>
+
+    <!-- audit_logs -->
+    <div class="db-table">
+      <div class="db-table-header" style="background:#F3F4F6">
+        <div class="db-table-name" style="color:#374151">📜 audit_logs</div>
+        <div class="db-table-count" style="background:#E5E7EB;color:#374151">Traçabilité</div>
+      </div>
+      <div class="db-fields">
+        <div class="db-field"><div class="field-pk">PK</div><div class="field-name pk">id</div><div class="field-type">uuid</div><div class="field-constraint fc-pk">PK</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">user_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-fk">FK</div><div class="field-name fk">university_id</div><div class="field-type">uuid</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">action</div><div class="field-type">varchar(50)</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">resource_type</div><div class="field-type">varchar(50)</div><div class="field-constraint fc-nn">NN</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">resource_id</div><div class="field-type">uuid</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">ip_address</div><div class="field-type">inet</div><div class="field-constraint fc-null">NULL</div></div>
+        <div class="db-field"><div class="field-dot"></div><div class="field-name">created_at</div><div class="field-type">timestamptz</div><div class="field-constraint fc-nn">NN</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- RÔLES -->
+<div id="tab-roles" class="content" style="display:none">
+  <div class="roles-grid">
+    <div class="role-card">
+      <div class="role-header" style="background:#E8F5EE">
+        <div class="role-icon" style="background:#D1FAE5">🎓</div>
+        <div><div class="role-name">Étudiant</div><div class="role-desc">Se connecte avec son email universitaire</div></div>
+      </div>
+      <div class="role-perms">
+        <div class="perm"><span class="perm-icon">✅</span>Se connecter avec son email .edu</div>
+        <div class="perm"><span class="perm-icon">✅</span>Voir les espaces de dépôt actifs</div>
+        <div class="perm"><span class="perm-icon">✅</span>Déposer un fichier dans un espace</div>
+        <div class="perm"><span class="perm-icon">✅</span>Voir le statut de ses dépôts</div>
+        <div class="perm"><span class="perm-icon">✅</span>Télécharger son récépissé</div>
+        <div class="perm"><span class="perm-icon">✅</span>Re-déposer si retourné par le prof</div>
+        <div class="perm"><span class="perm-icon">✅</span>Voir sa note si le prof l'a ajoutée</div>
+        <div class="perm"><span class="perm-icon">❌</span>Voir les dépôts des autres étudiants</div>
+        <div class="perm"><span class="perm-icon">❌</span>Créer des espaces de dépôt</div>
+        <div class="perm"><span class="perm-icon">❌</span>Accéder au dashboard admin</div>
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header" style="background:#EFF6FF">
+        <div class="role-icon" style="background:#DBEAFE">👨‍🏫</div>
+        <div><div class="role-name">Professeur / Encadreur</div><div class="role-desc">Gère les dépôts de ses étudiants</div></div>
+      </div>
+      <div class="role-perms">
+        <div class="perm"><span class="perm-icon">✅</span>Créer des espaces de dépôt (devoir, examen, soutenance)</div>
+        <div class="perm"><span class="perm-icon">✅</span>Définir deadline, formats acceptés, taille max</div>
+        <div class="perm"><span class="perm-icon">✅</span>Voir tous les dépôts de son espace</div>
+        <div class="perm"><span class="perm-icon">✅</span>Télécharger les fichiers déposés</div>
+        <div class="perm"><span class="perm-icon">✅</span>Valider / Retourner / Rejeter un dépôt</div>
+        <div class="perm"><span class="perm-icon">✅</span>Ajouter une note (0-20)</div>
+        <div class="perm"><span class="perm-icon">✅</span>Ajouter un commentaire de correction</div>
+        <div class="perm"><span class="perm-icon">✅</span>Exporter la liste des dépôts (CSV)</div>
+        <div class="perm"><span class="perm-icon">❌</span>Voir les espaces des autres profs</div>
+        <div class="perm"><span class="perm-icon">❌</span>Gérer les comptes utilisateurs</div>
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header" style="background:#FEF3C7">
+        <div class="role-icon" style="background:#FDE68A">🏫</div>
+        <div><div class="role-name">Admin Université</div><div class="role-desc">Gère son établissement</div></div>
+      </div>
+      <div class="role-perms">
+        <div class="perm"><span class="perm-icon">✅</span>Tout ce que fait un professeur</div>
+        <div class="perm"><span class="perm-icon">✅</span>Créer / suspendre des comptes profs et étudiants</div>
+        <div class="perm"><span class="perm-icon">✅</span>Gérer les départements et filières</div>
+        <div class="perm"><span class="perm-icon">✅</span>Voir tous les dépôts de l'université</div>
+        <div class="perm"><span class="perm-icon">✅</span>Tableau de bord statistiques de l'établissement</div>
+        <div class="perm"><span class="perm-icon">✅</span>Personnaliser le portail (logo, couleurs)</div>
+        <div class="perm"><span class="perm-icon">✅</span>Gérer le quota de stockage</div>
+        <div class="perm"><span class="perm-icon">❌</span>Accéder aux données d'autres universités</div>
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header" style="background:#F5F3FF">
+        <div class="role-icon" style="background:#EDE9FE">⚡</div>
+        <div><div class="role-name">Super Admin (toi)</div><div class="role-desc">Contrôle toute la plateforme</div></div>
+      </div>
+      <div class="role-perms">
+        <div class="perm"><span class="perm-icon">✅</span>Voir toutes les universités inscrites</div>
+        <div class="perm"><span class="perm-icon">✅</span>Activer / suspendre une université</div>
+        <div class="perm"><span class="perm-icon">✅</span>Statistiques nationales de la plateforme</div>
+        <div class="perm"><span class="perm-icon">✅</span>Gérer les plans et abonnements</div>
+        <div class="perm"><span class="perm-icon">✅</span>Surveiller le stockage total</div>
+        <div class="perm"><span class="perm-icon">✅</span>Accès aux logs d'audit globaux</div>
+        <div class="perm"><span class="perm-icon">✅</span>Accès complet en lecture à tout</div>
+        <div class="perm"><span class="perm-icon">✅</span>Déployer des mises à jour</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLUX -->
+<div id="tab-flux" class="content" style="display:none">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+    <div>
+      <h3 style="font-size:13px;font-weight:600;color:var(--g);margin-bottom:12px">🎓 Flux étudiant — Déposer un travail</h3>
+      <div class="flow-section">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-body">
+            <div class="flow-title">Connexion avec email universitaire</div>
+            <div class="flow-desc">L'étudiant entre son email (ex: prenom.nom@ucad.edu.sn). Le système détecte automatiquement l'université via le domaine email.</div>
+            <div class="flow-tags"><span class="ftag ftag-g">Auth Supabase</span><span class="ftag ftag-b">Email domain check</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-body">
+            <div class="flow-title">Voir les espaces de dépôt actifs</div>
+            <div class="flow-desc">L'étudiant voit la liste de tous les espaces ouverts pour son département avec les deadlines en couleur (vert / orange / rouge).</div>
+            <div class="flow-tags"><span class="ftag ftag-g">RLS Supabase</span><span class="ftag ftag-a">Deadline visuelle</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-body">
+            <div class="flow-title">Sélectionner et uploader le fichier</div>
+            <div class="flow-desc">Glisser-déposer ou sélection. Vérification format + taille côté client, puis upload vers Supabase Storage avec barre de progression.</div>
+            <div class="flow-tags"><span class="ftag ftag-g">Storage upload</span><span class="ftag ftag-b">Validation MIME</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-body">
+            <div class="flow-title">Confirmation + récépissé</div>
+            <div class="flow-desc">Écran de succès avec le numéro de dépôt, l'horodatage exact et un lien pour télécharger le récépissé PDF.</div>
+            <div class="flow-tags"><span class="ftag ftag-p">PDF généré</span><span class="ftag ftag-g">Notif WhatsApp</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div class="flow-body">
+            <div class="flow-title">Suivi du statut en temps réel</div>
+            <div class="flow-desc">Le dashboard étudiant affiche : Reçu → Lu → Validé / Retourné / Note attribuée. Notification à chaque changement.</div>
+            <div class="flow-tags"><span class="ftag ftag-b">Realtime</span><span class="ftag ftag-a">Notifications</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="font-size:13px;font-weight:600;color:var(--blue);margin-bottom:12px">👨‍🏫 Flux professeur — Évaluer un dépôt</h3>
+      <div class="flow-section">
+        <div class="flow-step">
+          <div class="flow-num" style="background:var(--blue)">1</div>
+          <div class="flow-body">
+            <div class="flow-title">Créer un espace de dépôt</div>
+            <div class="flow-desc">Le prof définit : titre, type (devoir/examen/soutenance), deadline, formats acceptés, taille max. Un code d'accès unique est généré.</div>
+            <div class="flow-tags"><span class="ftag ftag-b">Code unique</span><span class="ftag ftag-a">Deadline</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:var(--blue)">2</div>
+          <div class="flow-body">
+            <div class="flow-title">Notification à chaque nouveau dépôt</div>
+            <div class="flow-desc">Le prof reçoit un WhatsApp et/ou email dès qu'un étudiant dépose. Le tableau de bord se met à jour en temps réel.</div>
+            <div class="flow-tags"><span class="ftag ftag-g">WhatsApp</span><span class="ftag ftag-b">Email</span><span class="ftag ftag-p">Realtime</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:var(--blue)">3</div>
+          <div class="flow-body">
+            <div class="flow-title">Consulter et télécharger le fichier</div>
+            <div class="flow-desc">Le prof ouvre la fiche du dépôt, voit les infos (nom étudiant, date, taille) et télécharge le fichier via URL signée temporaire (15 min).</div>
+            <div class="flow-tags"><span class="ftag ftag-b">URL signée</span><span class="ftag ftag-g">Sécurisé</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:var(--blue)">4</div>
+          <div class="flow-body">
+            <div class="flow-title">Donner son verdict</div>
+            <div class="flow-desc">4 options : ✅ Valider · 📝 Valider + Note · 🔄 Retourner (corrections) · ❌ Rejeter. Un commentaire peut être ajouté.</div>
+            <div class="flow-tags"><span class="ftag ftag-g">Valider</span><span class="ftag ftag-a">Retourner</span><span class="ftag ftag-b">Noter</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num" style="background:var(--blue)">5</div>
+          <div class="flow-body">
+            <div class="flow-title">Notification automatique à l'étudiant</div>
+            <div class="flow-desc">L'étudiant est notifié par WhatsApp et email du verdict. Si retourné, il peut re-déposer une version corrigée.</div>
+            <div class="flow-tags"><span class="ftag ftag-g">WhatsApp étudiant</span><span class="ftag ftag-p">Re-dépôt</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STRUCTURE -->
+<div id="tab-structure" class="content" style="display:none">
+  <div class="folder-tree">
+<span class="f-dir">samadepot/</span>
+<div class="f-indent-1"><span class="f-dir">app/</span> <span class="f-comment">— Pages Next.js (App Router)</span>
+  <div class="f-indent-1"><span class="f-dir">(auth)/</span> <span class="f-comment">— Groupe routes publiques</span>
+    <div class="f-indent-1"><span class="f-file">login/page.tsx</span> <span class="f-comment">— Connexion email universitaire</span></div>
+    <div class="f-indent-1"><span class="f-file">register/page.tsx</span> <span class="f-comment">— Inscription étudiant</span></div>
+  </div>
+  <div class="f-indent-1"><span class="f-dir">(student)/</span> <span class="f-comment">— Espace étudiant (protégé)</span>
+    <div class="f-indent-1"><span class="f-file">dashboard/page.tsx</span> <span class="f-comment">— Mes dépôts + statuts</span></div>
+    <div class="f-indent-1"><span class="f-file">spaces/page.tsx</span> <span class="f-comment">— Espaces de dépôt disponibles</span></div>
+    <div class="f-indent-1"><span class="f-file">spaces/[id]/submit/page.tsx</span> <span class="f-comment">— Page de dépôt</span></div>
+    <div class="f-indent-1"><span class="f-file">submissions/[id]/page.tsx</span> <span class="f-comment">— Détail d'un dépôt</span></div>
+  </div>
+  <div class="f-indent-1"><span class="f-dir">(teacher)/</span> <span class="f-comment">— Espace professeur (protégé)</span>
+    <div class="f-indent-1"><span class="f-file">dashboard/page.tsx</span> <span class="f-comment">— Mes espaces + dépôts reçus</span></div>
+    <div class="f-indent-1"><span class="f-file">spaces/new/page.tsx</span> <span class="f-comment">— Créer un espace</span></div>
+    <div class="f-indent-1"><span class="f-file">spaces/[id]/page.tsx</span> <span class="f-comment">— Liste des dépôts reçus</span></div>
+    <div class="f-indent-1"><span class="f-file">spaces/[id]/[submissionId]/page.tsx</span> <span class="f-comment">— Évaluer un dépôt</span></div>
+  </div>
+  <div class="f-indent-1"><span class="f-dir">(admin)/</span> <span class="f-comment">— Admin université (protégé)</span>
+    <div class="f-indent-1"><span class="f-file">dashboard/page.tsx</span> <span class="f-comment">— Vue globale établissement</span></div>
+    <div class="f-indent-1"><span class="f-file">users/page.tsx</span> <span class="f-comment">— Gérer comptes</span></div>
+    <div class="f-indent-1"><span class="f-file">departments/page.tsx</span> <span class="f-comment">— Filières / Départements</span></div>
+  </div>
+  <div class="f-indent-1"><span class="f-dir">(superadmin)/</span> <span class="f-comment">— Ton espace (toi)</span>
+    <div class="f-indent-1"><span class="f-file">dashboard/page.tsx</span> <span class="f-comment">— Stats nationales</span></div>
+    <div class="f-indent-1"><span class="f-file">universities/page.tsx</span> <span class="f-comment">— Gérer les universités</span></div>
+  </div>
+  <div class="f-indent-1"><span class="f-dir">api/</span> <span class="f-comment">— API Routes Next.js</span>
+    <div class="f-indent-1"><span class="f-file">submissions/route.ts</span> <span class="f-comment">— GET/POST dépôts</span></div>
+    <div class="f-indent-1"><span class="f-file">submissions/[id]/review/route.ts</span> <span class="f-comment">— PATCH évaluation</span></div>
+    <div class="f-indent-1"><span class="f-file">spaces/route.ts</span> <span class="f-comment">— GET/POST espaces</span></div>
+    <div class="f-indent-1"><span class="f-file">upload/route.ts</span> <span class="f-comment">— Upload fichier sécurisé</span></div>
+    <div class="f-indent-1"><span class="f-file">notifications/route.ts</span> <span class="f-comment">— WhatsApp/Email</span></div>
+    <div class="f-indent-1"><span class="f-file">auth/[...nextauth]/route.ts</span> <span class="f-comment">— Auth</span></div>
+  </div>
+</div>
+<div class="f-indent-1"><span class="f-dir">components/</span>
+  <div class="f-indent-1"><span class="f-dir">ui/</span> <span class="f-comment">— Boutons, inputs, badges, modals</span></div>
+  <div class="f-indent-1"><span class="f-dir">student/</span> <span class="f-comment">— UploadZone, SubmissionCard, StatusBadge</span></div>
+  <div class="f-indent-1"><span class="f-dir">teacher/</span> <span class="f-comment">— SpaceCard, ReviewPanel, SubmissionList</span></div>
+  <div class="f-indent-1"><span class="f-dir">admin/</span> <span class="f-comment">— StatsGrid, UserTable, DeptManager</span></div>
+  <div class="f-indent-1"><span class="f-dir">layout/</span> <span class="f-comment">— Navbar, Sidebar, Footer</span></div>
+</div>
+<div class="f-indent-1"><span class="f-dir">lib/</span>
+  <div class="f-indent-1"><span class="f-file">supabase.ts</span> <span class="f-comment">— Client Supabase (browser + server)</span></div>
+  <div class="f-indent-1"><span class="f-file">db/</span> <span class="f-comment">— Fonctions BDD (submissions, spaces, users)</span></div>
+  <div class="f-indent-1"><span class="f-file">whatsapp.ts</span> <span class="f-comment">— Notifications WhatsApp Business</span></div>
+  <div class="f-indent-1"><span class="f-file">storage.ts</span> <span class="f-comment">— Upload + URL signées Supabase Storage</span></div>
+  <div class="f-indent-1"><span class="f-file">pdf.ts</span> <span class="f-comment">— Génération récépissé PDF</span></div>
+  <div class="f-indent-1"><span class="f-file">validation.ts</span> <span class="f-comment">— Zod schemas</span></div>
+  <div class="f-indent-1"><span class="f-file">utils.ts</span> <span class="f-comment">— Helpers divers</span></div>
+</div>
+<div class="f-indent-1"><span class="f-dir">types/</span>
+  <div class="f-indent-1"><span class="f-file">index.ts</span> <span class="f-comment">— University, User, Space, Submission, Review...</span></div>
+  <div class="f-indent-1"><span class="f-file">database.types.ts</span> <span class="f-comment">— Types auto-générés Supabase</span></div>
+</div>
+<div class="f-indent-1"><span class="f-file">middleware.ts</span> <span class="f-comment">— Protection routes par rôle</span></div>
+<div class="f-indent-1"><span class="f-file">.env.local.example</span> <span class="f-comment">— Variables d'environnement</span></div>
+<div class="f-indent-1"><span class="f-file">supabase/schema.sql</span> <span class="f-comment">— Schéma PostgreSQL complet</span></div>
+  </div>
+</div>
+
+<!-- PLANNING -->
+<div id="tab-planning" class="content" style="display:none">
+  <div class="phases">
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">1</div>
+        <div class="phase-info">
+          <div class="phase-name">Setup & Fondations</div>
+          <div class="phase-duration">⏱ 3-4 jours</div>
+        </div>
+        <div class="phase-status ps-todo">À faire en 1er</div>
+      </div>
+      <div class="phase-items">
+        <div class="pi">Initialiser le projet Next.js 14 + TypeScript + Tailwind CSS</div>
+        <div class="pi">Créer le projet Supabase + exécuter le schema.sql complet</div>
+        <div class="pi">Configurer l'authentification par email (Supabase Auth)</div>
+        <div class="pi">Mettre en place la détection d'université via le domaine email</div>
+        <div class="pi">Configurer le middleware de protection des routes par rôle</div>
+        <div class="pi">Déployer sur Vercel (staging)</div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">2</div>
+        <div class="phase-info">
+          <div class="phase-name">Dépôt de fichiers (cœur du projet)</div>
+          <div class="phase-duration">⏱ 1-2 semaines</div>
+        </div>
+        <div class="phase-status ps-v1">MVP</div>
+      </div>
+      <div class="phase-items">
+        <div class="pi">Interface étudiant : liste des espaces de dépôt + deadlines</div>
+        <div class="pi">Zone d'upload avec glisser-déposer, validation format/taille</div>
+        <div class="pi">Upload sécurisé vers Supabase Storage + hash SHA-256 du fichier</div>
+        <div class="pi">Interface professeur : créer un espace de dépôt</div>
+        <div class="pi">Liste des dépôts reçus avec téléchargement sécurisé</div>
+        <div class="pi">Panneau d'évaluation : Valider / Retourner / Rejeter / Note</div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">3</div>
+        <div class="phase-info">
+          <div class="phase-name">Notifications & Récépissé</div>
+          <div class="phase-duration">⏱ 3-5 jours</div>
+        </div>
+        <div class="phase-status ps-v1">MVP</div>
+      </div>
+      <div class="phase-items">
+        <div class="pi">Intégration WhatsApp Business API — notifications dépôt reçu</div>
+        <div class="pi">Notifications email via Resend — confirmation étudiant + prof</div>
+        <div class="pi">Génération du récépissé PDF horodaté avec hash du fichier</div>
+        <div class="pi">Notifications en temps réel dans l'interface (Supabase Realtime)</div>
+        <div class="pi">Notification étudiant à chaque changement de statut</div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">4</div>
+        <div class="phase-info">
+          <div class="phase-name">Dashboard Admin Université</div>
+          <div class="phase-duration">⏱ 1 semaine</div>
+        </div>
+        <div class="phase-status ps-todo">Post-MVP</div>
+      </div>
+      <div class="phase-items">
+        <div class="pi">Vue globale : dépôts du jour, en attente, validés, statistiques</div>
+        <div class="pi">Gestion des comptes étudiants et professeurs</div>
+        <div class="pi">Gestion des départements et filières</div>
+        <div class="pi">Personnalisation du portail (logo, nom université)</div>
+        <div class="pi">Export des données en CSV/Excel</div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">5</div>
+        <div class="phase-info">
+          <div class="phase-name">Multi-tenant + Super Admin</div>
+          <div class="phase-duration">⏱ 1 semaine</div>
+        </div>
+        <div class="phase-status ps-todo">Post-MVP</div>
+      </div>
+      <div class="phase-items">
+        <div class="pi">Ton dashboard : gérer toutes les universités inscrites</div>
+        <div class="pi">Onboarding d'une nouvelle université (formulaire + activation)</div>
+        <div class="pi">Statistiques nationales : dépôts totaux, universités actives</div>
+        <div class="pi">Gestion des plans et abonnements</div>
+        <div class="pi">Surveillance stockage global + alertes</div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">6</div>
+        <div class="phase-info">
+          <div class="phase-name">Tests, sécurité & lancement pilote</div>
+          <div class="phase-duration">⏱ 1 semaine</div>
+        </div>
+        <div class="phase-status ps-todo">Final</div>
+      </div>
+      <div class="phase-items">
+        <div class="pi">Tests complets des 4 rôles (étudiant, prof, admin, superadmin)</div>
+        <div class="pi">Audit sécurité : RLS Supabase, headers, rate limiting</div>
+        <div class="pi">Tests mobile (smartphone sénégalais courants)</div>
+        <div class="pi">Déploiement sur samadepot.sn</div>
+        <div class="pi">Lancement pilote dans 1-2 universités de Dakar</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(name, el) {
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display='none');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+name).style.display='block';
+  el.classList.add('active');
+}
+</script>

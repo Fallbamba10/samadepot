@@ -1,0 +1,551 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1B7F4A;--gl:#E8F5EE;--gm:#2EA65A;--gb:#D1FAE5;
+  --amber:#D97706;--ambl:#FEF3C7;--amb2:#FDE68A;
+  --blue:#1D4ED8;--bl:#EFF6FF;--bl2:#DBEAFE;
+  --red:#DC2626;--rl:#FEF2F2;
+  --purple:#7C3AED;--pl:#F5F3FF;
+}
+body{font-family:var(--font-sans);background:var(--color-background-primary)}
+
+.screen-tabs{display:flex;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);overflow-x:auto}
+.stab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--color-text-secondary);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.stab.on{color:var(--g);border-bottom-color:var(--g);background:var(--color-background-primary)}
+.stab:hover:not(.on){color:var(--color-text-primary)}
+
+.screen{display:none;padding:0}
+.screen.on{display:block}
+
+/* ── SHARED ── */
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;height:52px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-dot{width:28px;height:28px;background:var(--g);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:500}
+.brand-name{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.brand-name span{color:var(--g)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--gl);border:0.5px solid var(--gb);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--g)}
+.page-wrap{padding:1.25rem}
+.pg-title{font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.pg-sub{font-size:12px;color:var(--color-text-secondary);margin-bottom:1.25rem}
+
+/* ── LOGIN ── */
+.login-wrap{display:flex;align-items:center;justify-content:center;padding:2rem 1rem;background:var(--color-background-tertiary);min-height:480px}
+.login-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.75rem;width:340px}
+.login-logo{text-align:center;margin-bottom:1.25rem}
+.login-dot{width:48px;height:48px;background:var(--g);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:#fff;font-size:20px;font-weight:500}
+.login-title{font-size:18px;font-weight:500;color:var(--color-text-primary);text-align:center;margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--color-text-secondary);text-align:center;margin-bottom:1.5rem}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:4px}
+.field input{width:100%;padding:8px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:13px;background:var(--color-background-secondary);color:var(--color-text-primary);outline:none}
+.field input:focus{border-color:var(--g)}
+.login-btn{width:100%;padding:10px;background:var(--g);color:#fff;border:none;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;margin-top:4px;font-family:var(--font-sans)}
+.login-note{font-size:11px;color:var(--color-text-secondary);text-align:center;margin-top:12px}
+.login-detect{background:var(--gl);border:0.5px solid var(--gb);border-radius:var(--border-radius-md);padding:8px 10px;margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--g)}
+.login-detect-dot{width:7px;height:7px;border-radius:50%;background:var(--gm);flex-shrink:0}
+
+/* ── CARDS ── */
+.cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.kcard{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px}
+.kcard-num{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.kcard-lbl{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+
+/* ── STATUS BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px}
+.b-received{background:var(--bl2);color:var(--blue)}
+.b-validated{background:var(--gl);color:var(--g)}
+.b-graded{background:var(--ambl);color:var(--amber)}
+.b-returned{background:var(--rl);color:var(--red)}
+.b-late{background:var(--rl);color:var(--red)}
+.b-open{background:var(--gl);color:var(--g)}
+.b-urgent{background:var(--ambl);color:var(--amber)}
+.b-expired{background:var(--rl);color:var(--red)}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{text-align:left;padding:8px 10px;font-size:11px;font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+.data-table td{padding:9px 10px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--color-background-secondary)}
+
+/* ── SPACE CARDS ── */
+.spaces-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.space-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;border-top:2px solid var(--g)}
+.space-card.urgent{border-top-color:var(--amber)}
+.space-card.expired{border-top-color:var(--red);opacity:.7}
+.space-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.space-meta{font-size:11px;color:var(--color-text-secondary);margin-bottom:8px}
+.space-footer{display:flex;align-items:center;justify-content:space-between}
+.space-deadline{font-size:11px;font-weight:500}
+.space-dl-ok{color:var(--g)}
+.space-dl-warn{color:var(--amber)}
+.space-dl-exp{color:var(--red)}
+.btn-sm{padding:5px 12px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;cursor:pointer;border:none;font-family:var(--font-sans)}
+.btn-g{background:var(--g);color:#fff}
+.btn-outline{background:transparent;color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary)}
+.btn-outline:hover{color:var(--color-text-primary)}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{border:1.5px dashed var(--gb);border-radius:var(--border-radius-lg);padding:2rem;text-align:center;background:var(--gl);margin-bottom:1rem}
+.upload-icon{width:40px;height:40px;border-radius:50%;background:#fff;border:0.5px solid var(--gb);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:18px}
+.upload-title{font-size:13px;font-weight:500;color:var(--g);margin-bottom:4px}
+.upload-sub{font-size:11px;color:var(--color-text-secondary)}
+.upload-formats{display:flex;gap:4px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.fmt-tag{font-size:10px;padding:2px 7px;border-radius:4px;background:#fff;border:0.5px solid var(--gb);color:var(--g)}
+
+/* ── SIDEBAR ── */
+.layout-sidebar{display:grid;grid-template-columns:180px 1fr;min-height:420px}
+.sidebar{background:var(--color-background-secondary);border-right:0.5px solid var(--color-border-tertiary);padding:12px 0}
+.sb-section{font-size:10px;font-weight:500;color:var(--color-text-secondary);padding:0 12px;margin:12px 0 4px;letter-spacing:.5px;text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:12px;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.sb-item:hover{background:var(--color-background-primary);color:var(--color-text-primary)}
+.sb-item.on{background:var(--gl);color:var(--g);font-weight:500}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--color-border-tertiary);flex-shrink:0}
+.sb-item.on .sb-dot{background:var(--gm)}
+.sidebar-main{padding:1.25rem;overflow:hidden}
+
+/* ── REVIEW PANEL ── */
+.review-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;margin-bottom:10px}
+.review-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.review-student{display:flex;align-items:center;gap:8px}
+.review-avatar{width:32px;height:32px;border-radius:50%;background:var(--bl2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--blue)}
+.review-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.review-sub{font-size:11px;color:var(--color-text-secondary)}
+.review-file{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.file-icon{width:28px;height:28px;border-radius:6px;background:var(--rl);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--red);flex-shrink:0}
+.file-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.file-meta{font-size:11px;color:var(--color-text-secondary)}
+.decision-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.d-btn{padding:8px 4px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500;text-align:center;cursor:pointer;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans)}
+.d-btn.validate{background:var(--gl);color:var(--g);border-color:var(--gb)}
+.d-btn.grade{background:var(--ambl);color:var(--amber);border-color:var(--amb2)}
+.d-btn.return{background:var(--bl);color:var(--blue);border-color:var(--bl2)}
+.d-btn.reject{background:var(--rl);color:var(--red);border-color:#FECACA}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap{background:var(--color-background-secondary);border-radius:4px;height:4px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;background:var(--g);border-radius:4px;transition:width .3s}
+
+/* ── NOTIF BADGE ── */
+.notif{position:relative;display:inline-flex}
+.notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--red);border-radius:50%;border:1.5px solid var(--color-background-primary)}
+
+/* ── RECEIPT ── */
+.receipt{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem;border-top:3px solid var(--g);margin-top:1rem}
+.receipt-title{font-size:13px;font-weight:500;color:var(--g);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.receipt-row{display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.receipt-row:last-child{border-bottom:none}
+.receipt-label{color:var(--color-text-secondary)}
+.receipt-val{font-weight:500;color:var(--color-text-primary);font-family:var(--font-sans)}
+.receipt-hash{font-size:9px;font-family:var(--font-sans);color:var(--color-text-secondary);word-break:break-all}
+</style>
+
+<h2 class="sr-only">Maquettes des 4 interfaces SamaDepot : connexion, espace étudiant, espace professeur, dashboard admin</h2>
+
+<div class="screen-tabs">
+  <div class="stab on" onclick="show('login',this)">Connexion</div>
+  <div class="stab" onclick="show('student',this)">Espace étudiant</div>
+  <div class="stab" onclick="show('deposit',this)">Déposer un fichier</div>
+  <div class="stab" onclick="show('teacher',this)">Espace professeur</div>
+  <div class="stab" onclick="show('review',this)">Évaluer un dépôt</div>
+  <div class="stab" onclick="show('admin',this)">Dashboard admin</div>
+</div>
+
+<!-- ══ LOGIN ══ -->
+<div id="s-login" class="screen on">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="login-dot">SD</div>
+        <div class="login-title">SamaDepot</div>
+        <div class="login-sub">Connecte-toi avec ton email universitaire</div>
+      </div>
+      <div class="field">
+        <label>Email universitaire</label>
+        <input type="email" value="prenom.nom@ucad.edu.sn" readonly />
+      </div>
+      <div class="login-detect">
+        <div class="login-detect-dot"></div>
+        Université Cheikh Anta Diop détectée
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" value="••••••••" readonly />
+      </div>
+      <button class="login-btn">Se connecter</button>
+      <div class="login-note">Pas de compte ? Contacte ton administration</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STUDENT DASHBOARD ══ -->
+<div id="s-student" class="screen">
+  <div class="navbar">
+    <div class="brand"><div class="brand-dot">SD</div><div class="brand-name">Sama<span>Depot</span></div></div>
+    <div class="nav-right">
+      <div class="notif"><div style="font-size:16px">🔔</div><div class="notif-dot"></div></div>
+      <div class="avatar">AF</div>
+      <span style="font-size:12px;color:var(--color-text-secondary)">Aminata Fall · L3 INFO</span>
+    </div>
+  </div>
+  <div class="page-wrap">
+    <div class="pg-title">Bonjour Aminata 👋</div>
+    <div class="pg-sub">Université Cheikh Anta Diop — Département Informatique</div>
+    <div class="cards-row">
+      <div class="kcard"><div class="kcard-num">4</div><div class="kcard-lbl">Dépôts effectués</div></div>
+      <div class="kcard"><div class="kcard-num" style="color:var(--g)">2</div><div class="kcard-lbl">Validés</div></div>
+      <div class="kcard"><div class="kcard-num" style="color:var(--amber)">1</div><div class="kcard-lbl">En attente</div></div>
+      <div class="kcard"><div class="kcard-num" style="color:var(--red)">1</div><div class="kcard-lbl">Retourné</div></div>
+    </div>
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px">Espaces de dépôt ouverts</div>
+    <div class="spaces-grid">
+      <div class="space-card">
+        <div class="space-title">Projet de fin d'études 2024</div>
+        <div class="space-meta">Prof. Diallo Ibrahim · PFE · Tous niveaux</div>
+        <div class="space-footer">
+          <span class="space-deadline space-dl-ok">Clôture dans 5 jours</span>
+          <button class="btn-sm btn-g">Déposer</button>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:60%"></div></div>
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-top:3px">18/30 dépôts reçus</div>
+      </div>
+      <div class="space-card urgent">
+        <div class="space-title">Devoir de Réseaux Informatiques</div>
+        <div class="space-meta">Prof. Ndiaye Fatou · Devoir · L3</div>
+        <div class="space-footer">
+          <span class="space-deadline space-dl-warn">Clôture dans 18h</span>
+          <button class="btn-sm btn-g">Déposer</button>
+        </div>
+        <div class="progress-wrap" style="background:var(--ambl)"><div class="progress-fill" style="width:80%;background:var(--amber)"></div></div>
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-top:3px">24/30 dépôts reçus</div>
+      </div>
+      <div class="space-card expired">
+        <div class="space-title">TP Base de données — Séance 3</div>
+        <div class="space-meta">Prof. Sow Moussa · TP · L3</div>
+        <div class="space-footer">
+          <span class="space-deadline space-dl-exp">Clôturé</span>
+          <button class="btn-sm btn-outline" disabled>Fermé</button>
+        </div>
+      </div>
+      <div class="space-card">
+        <div class="space-title">Rapport de Stage — Session 2</div>
+        <div class="space-meta">Prof. Kane Aïssatou · Rapport · M1</div>
+        <div class="space-footer">
+          <span class="space-deadline space-dl-ok">Clôture dans 12 jours</span>
+          <button class="btn-sm btn-g">Déposer</button>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px">Mes dépôts récents</div>
+    <table class="data-table">
+      <thead><tr><th>Titre</th><th>Type</th><th>Déposé le</th><th>Statut</th><th></th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:500">Rapport_PFE_AminataFall.pdf</td>
+          <td>PFE</td>
+          <td>28 Avr 2024 · 14h22</td>
+          <td><span class="badge b-received">Reçu</span></td>
+          <td><button class="btn-sm btn-outline">Voir</button></td>
+        </tr>
+        <tr>
+          <td style="font-weight:500">Devoir_Reseaux_v2.pdf</td>
+          <td>Devoir</td>
+          <td>25 Avr 2024 · 09h15</td>
+          <td><span class="badge b-validated">Validé</span></td>
+          <td><button class="btn-sm btn-outline">Voir</button></td>
+        </tr>
+        <tr>
+          <td style="font-weight:500">TP_BDD_Seance2.zip</td>
+          <td>TP</td>
+          <td>20 Avr 2024 · 16h40</td>
+          <td><span class="badge b-graded">Noté · 16/20</span></td>
+          <td><button class="btn-sm btn-outline">Voir</button></td>
+        </tr>
+        <tr>
+          <td style="font-weight:500">Expose_Algorithmes.pptx</td>
+          <td>Exposé</td>
+          <td>15 Avr 2024 · 11h05</td>
+          <td><span class="badge b-returned">Retourné</span></td>
+          <td><button class="btn-sm btn-outline">Re-déposer</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ DEPOSIT PAGE ══ -->
+<div id="s-deposit" class="screen">
+  <div class="navbar">
+    <div class="brand"><div class="brand-dot">SD</div><div class="brand-name">Sama<span>Depot</span></div></div>
+    <div class="nav-right"><div class="avatar">AF</div></div>
+  </div>
+  <div class="page-wrap">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <button class="btn-sm btn-outline">← Retour</button>
+      <div class="pg-title" style="margin:0">Déposer mon fichier</div>
+    </div>
+    <div class="pg-sub">Projet de fin d'études 2024 · Prof. Diallo Ibrahim · Clôture dans 5 jours</div>
+    <div class="review-card" style="margin-bottom:12px">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px;font-weight:500">Consignes du professeur</div>
+      <div style="font-size:12px;color:var(--color-text-primary);line-height:1.6">Déposez votre rapport de PFE en PDF avec la présentation PowerPoint dans un fichier ZIP. Le nom du fichier doit respecter le format : NOM_Prenom_PFE2024.</div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <span class="badge b-validated">PDF</span>
+        <span class="badge b-validated">DOCX</span>
+        <span class="badge b-validated">ZIP</span>
+        <span class="badge b-graded">Max 100 Mo</span>
+      </div>
+    </div>
+    <div class="upload-zone">
+      <div class="upload-icon">📁</div>
+      <div class="upload-title">Glisser-déposer votre fichier ici</div>
+      <div class="upload-sub">ou cliquer pour sélectionner depuis votre appareil</div>
+      <div class="upload-formats">
+        <span class="fmt-tag">PDF</span>
+        <span class="fmt-tag">DOCX</span>
+        <span class="fmt-tag">PPTX</span>
+        <span class="fmt-tag">ZIP</span>
+      </div>
+    </div>
+    <div class="review-file" style="margin-bottom:12px">
+      <div class="file-icon">PDF</div>
+      <div style="flex:1">
+        <div class="file-name">NOM_AminataFall_PFE2024.pdf</div>
+        <div class="file-meta">4.2 Mo · Sélectionné</div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+      <button class="btn-sm btn-outline" style="color:var(--red)">✕</button>
+    </div>
+    <div class="field">
+      <label>Note pour le professeur (optionnel)</label>
+      <input type="text" placeholder="Ex: Version corrigée suite aux remarques..." />
+    </div>
+    <button class="login-btn" style="margin-top:8px">Confirmer le dépôt</button>
+    <div class="receipt">
+      <div class="receipt-title">✓ Récépissé de dépôt</div>
+      <div class="receipt-row"><span class="receipt-label">Numéro dépôt</span><span class="receipt-val">SD-2024-00847</span></div>
+      <div class="receipt-row"><span class="receipt-label">Fichier</span><span class="receipt-val">NOM_AminataFall_PFE2024.pdf</span></div>
+      <div class="receipt-row"><span class="receipt-label">Horodatage</span><span class="receipt-val">28 Avr 2024 · 14:22:07 WAT</span></div>
+      <div class="receipt-row"><span class="receipt-label">Taille</span><span class="receipt-val">4.2 Mo</span></div>
+      <div class="receipt-row"><span class="receipt-label">Hash SHA-256</span><span class="receipt-hash">a3f4b2c1d5e6f789abcdef0123456789abcdef0123456789abcdef0123456789</span></div>
+      <button class="btn-sm btn-g" style="margin-top:8px;width:100%">Télécharger le récépissé PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEACHER DASHBOARD ══ -->
+<div id="s-teacher" class="screen">
+  <div class="navbar">
+    <div class="brand"><div class="brand-dot">SD</div><div class="brand-name">Sama<span>Depot</span></div></div>
+    <div class="nav-right">
+      <div class="notif"><div style="font-size:16px">🔔</div><div class="notif-dot"></div></div>
+      <div class="avatar" style="background:var(--bl2);color:var(--blue)">DI</div>
+      <span style="font-size:12px;color:var(--color-text-secondary)">Prof. Diallo Ibrahim</span>
+    </div>
+  </div>
+  <div class="layout-sidebar">
+    <div class="sidebar">
+      <div class="sb-section">Navigation</div>
+      <div class="sb-item on"><div class="sb-dot"></div>Tableau de bord</div>
+      <div class="sb-item"><div class="sb-dot"></div>Mes espaces</div>
+      <div class="sb-item"><div class="sb-dot"></div>Tous les dépôts</div>
+      <div class="sb-section">Actions</div>
+      <div class="sb-item"><div class="sb-dot"></div>Créer un espace</div>
+      <div class="sb-item"><div class="sb-dot"></div>Exporter CSV</div>
+      <div class="sb-section">Compte</div>
+      <div class="sb-item"><div class="sb-dot"></div>Mon profil</div>
+      <div class="sb-item"><div class="sb-dot"></div>Se déconnecter</div>
+    </div>
+    <div class="sidebar-main">
+      <div class="pg-title">Tableau de bord</div>
+      <div class="pg-sub">UCAD — Département Informatique</div>
+      <div class="cards-row" style="grid-template-columns:repeat(2,1fr);margin-bottom:12px">
+        <div class="kcard"><div class="kcard-num">3</div><div class="kcard-lbl">Espaces actifs</div></div>
+        <div class="kcard"><div class="kcard-num" style="color:var(--amber)">7</div><div class="kcard-lbl">Dépôts en attente</div></div>
+        <div class="kcard"><div class="kcard-num" style="color:var(--g)">41</div><div class="kcard-lbl">Validés</div></div>
+        <div class="kcard"><div class="kcard-num">62</div><div class="kcard-lbl">Total dépôts</div></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Dépôts récents à traiter</div>
+        <button class="btn-sm btn-g">+ Créer un espace</button>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Étudiant</th><th>Fichier</th><th>Espace</th><th>Déposé</th><th>Statut</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td><div style="font-weight:500;font-size:12px">Aminata Fall</div><div style="font-size:10px;color:var(--color-text-secondary)">L3 INFO</div></td>
+            <td style="font-size:11px">Rapport_PFE_v2.pdf · 4.2 Mo</td>
+            <td style="font-size:11px">PFE 2024</td>
+            <td style="font-size:11px;color:var(--color-text-secondary)">Il y a 2h</td>
+            <td><span class="badge b-received">Reçu</span></td>
+            <td><button class="btn-sm btn-g">Évaluer</button></td>
+          </tr>
+          <tr>
+            <td><div style="font-weight:500;font-size:12px">Moussa Diop</div><div style="font-size:10px;color:var(--color-text-secondary)">L3 INFO</div></td>
+            <td style="font-size:11px">PFE_MoussaDiop.zip · 18 Mo</td>
+            <td style="font-size:11px">PFE 2024</td>
+            <td style="font-size:11px;color:var(--color-text-secondary)">Il y a 5h</td>
+            <td><span class="badge b-received">Reçu</span></td>
+            <td><button class="btn-sm btn-g">Évaluer</button></td>
+          </tr>
+          <tr>
+            <td><div style="font-weight:500;font-size:12px">Fatou Sarr</div><div style="font-size:10px;color:var(--color-text-secondary)">L3 INFO</div></td>
+            <td style="font-size:11px">Expose_Algo_v2.pptx · 2.1 Mo</td>
+            <td style="font-size:11px">Exposé Algo</td>
+            <td style="font-size:11px;color:var(--color-text-secondary)">Hier</td>
+            <td><span class="badge b-returned">Retourné</span></td>
+            <td><button class="btn-sm btn-outline">Voir</button></td>
+          </tr>
+          <tr>
+            <td><div style="font-weight:500;font-size:12px">Ibrahima Ba</div><div style="font-size:10px;color:var(--color-text-secondary)">L3 INFO</div></td>
+            <td style="font-size:11px">Devoir_Reseaux.pdf · 1.8 Mo</td>
+            <td style="font-size:11px">Devoir Réseaux</td>
+            <td style="font-size:11px;color:var(--color-text-secondary)">Hier</td>
+            <td><span class="badge b-validated">Validé</span></td>
+            <td><button class="btn-sm btn-outline">Voir</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REVIEW PAGE ══ -->
+<div id="s-review" class="screen">
+  <div class="navbar">
+    <div class="brand"><div class="brand-dot">SD</div><div class="brand-name">Sama<span>Depot</span></div></div>
+    <div class="nav-right"><div class="avatar" style="background:var(--bl2);color:var(--blue)">DI</div></div>
+  </div>
+  <div class="page-wrap">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <button class="btn-sm btn-outline">← Retour</button>
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Évaluer le dépôt · PFE 2024</div>
+    </div>
+    <div class="review-card">
+      <div class="review-header">
+        <div class="review-student">
+          <div class="review-avatar">AF</div>
+          <div>
+            <div class="review-name">Aminata Fall</div>
+            <div class="review-sub">L3 Informatique · 28 Avr 2024 · 14:22</div>
+          </div>
+        </div>
+        <span class="badge b-received">Reçu</span>
+      </div>
+      <div class="review-file">
+        <div class="file-icon">PDF</div>
+        <div style="flex:1">
+          <div class="file-name">Rapport_PFE_AminataFall.pdf</div>
+          <div class="file-meta">4.2 Mo · SHA-256: a3f4b2c1d5e6...</div>
+        </div>
+        <button class="btn-sm btn-g">Télécharger</button>
+      </div>
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px">Donner mon verdict</div>
+      <div class="decision-btns">
+        <div class="d-btn validate">✓ Valider</div>
+        <div class="d-btn grade">★ Valider + Note</div>
+        <div class="d-btn return">↩ Retourner</div>
+        <div class="d-btn reject">✕ Rejeter</div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px">Ajouter une note (optionnel)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="field" style="margin:0"><label>Note</label><input type="number" value="16" /></div>
+        <div class="field" style="margin:0"><label>Sur</label><input type="number" value="20" /></div>
+      </div>
+      <div class="field" style="margin:0">
+        <label>Commentaire pour l'étudiant</label>
+        <input type="text" placeholder="Bon travail, quelques améliorations à apporter sur..." />
+      </div>
+    </div>
+    <button class="login-btn">Envoyer l'évaluation</button>
+    <div style="font-size:11px;color:var(--color-text-secondary);text-align:center;margin-top:8px">L'étudiant sera notifié par WhatsApp et email</div>
+  </div>
+</div>
+
+<!-- ══ ADMIN DASHBOARD ══ -->
+<div id="s-admin" class="screen">
+  <div class="navbar">
+    <div class="brand"><div class="brand-dot">SD</div><div class="brand-name">Sama<span>Depot</span></div></div>
+    <div class="nav-right">
+      <div class="avatar" style="background:var(--ambl);color:var(--amber)">AD</div>
+      <span style="font-size:12px;color:var(--color-text-secondary)">Admin · UCAD</span>
+    </div>
+  </div>
+  <div class="layout-sidebar">
+    <div class="sidebar">
+      <div class="sb-section">Navigation</div>
+      <div class="sb-item on"><div class="sb-dot"></div>Vue globale</div>
+      <div class="sb-item"><div class="sb-dot"></div>Tous les dépôts</div>
+      <div class="sb-item"><div class="sb-dot"></div>Utilisateurs</div>
+      <div class="sb-item"><div class="sb-dot"></div>Départements</div>
+      <div class="sb-section">Rapports</div>
+      <div class="sb-item"><div class="sb-dot"></div>Statistiques</div>
+      <div class="sb-item"><div class="sb-dot"></div>Exporter données</div>
+      <div class="sb-section">Paramètres</div>
+      <div class="sb-item"><div class="sb-dot"></div>Mon université</div>
+      <div class="sb-item"><div class="sb-dot"></div>Stockage</div>
+    </div>
+    <div class="sidebar-main">
+      <div class="pg-title">Vue globale — UCAD</div>
+      <div class="pg-sub">Université Cheikh Anta Diop de Dakar</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+        <div class="kcard"><div class="kcard-num">1 247</div><div class="kcard-lbl">Étudiants actifs</div></div>
+        <div class="kcard"><div class="kcard-num">84</div><div class="kcard-lbl">Professeurs</div></div>
+        <div class="kcard"><div class="kcard-num">362</div><div class="kcard-lbl">Dépôts ce mois</div></div>
+        <div class="kcard"><div class="kcard-num" style="color:var(--amber)">23</div><div class="kcard-lbl">En attente</div></div>
+        <div class="kcard"><div class="kcard-num" style="color:var(--g)">318</div><div class="kcard-lbl">Validés / Notés</div></div>
+        <div class="kcard"><div class="kcard-num">3.2 Go</div><div class="kcard-lbl">Stockage utilisé / 5 Go</div></div>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-secondary);margin-bottom:4px"><span>Stockage utilisé</span><span>3.2 Go / 5 Go (64%)</span></div>
+        <div class="progress-wrap" style="height:8px;border-radius:4px"><div class="progress-fill" style="width:64%"></div></div>
+      </div>
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:12px 0 8px">Activité récente</div>
+      <table class="data-table">
+        <thead><tr><th>Étudiant</th><th>Professeur</th><th>Type</th><th>Date</th><th>Statut</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="font-size:12px;font-weight:500">Aminata Fall</td>
+            <td style="font-size:12px">Prof. Diallo</td>
+            <td><span class="badge b-validated" style="font-size:10px">PFE</span></td>
+            <td style="font-size:11px;color:var(--color-text-secondary)">Aujourd'hui 14h22</td>
+            <td><span class="badge b-received">Reçu</span></td>
+          </tr>
+          <tr>
+            <td style="font-size:12px;font-weight:500">Moussa Diop</td>
+            <td style="font-size:12px">Prof. Diallo</td>
+            <td><span class="badge b-validated" style="font-size:10px">PFE</span></td>
+            <td style="font-size:11px;color:var(--color-text-secondary)">Aujourd'hui 09h15</td>
+            <td><span class="badge b-received">Reçu</span></td>
+          </tr>
+          <tr>
+            <td style="font-size:12px;font-weight:500">Fatou Sarr</td>
+            <td style="font-size:12px">Prof. Sow</td>
+            <td><span class="badge b-graded" style="font-size:10px">Devoir</span></td>
+            <td style="font-size:11px;color:var(--color-text-secondary)">Hier 16h40</td>
+            <td><span class="badge b-graded">Noté · 17/20</span></td>
+          </tr>
+          <tr>
+            <td style="font-size:12px;font-weight:500">Ibrahima Ba</td>
+            <td style="font-size:12px">Prof. Ndiaye</td>
+            <td><span class="badge b-graded" style="font-size:10px">TP</span></td>
+            <td style="font-size:11px;color:var(--color-text-secondary)">Hier 11h05</td>
+            <td><span class="badge b-validated">Validé</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(name, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.stab').forEach(t => t.classList.remove('on'));
+  document.getElementById('s-'+name).classList.add('on');
+  el.classList.add('on');
+}
+</script>

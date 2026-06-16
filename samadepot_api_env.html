@@ -1,0 +1,216 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-background-primary)}
+.tabs{display:flex;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+.tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--color-text-secondary);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tab.on{color:#1B7F4A;border-bottom-color:#1B7F4A;background:var(--color-background-primary)}
+.screen{display:none;padding:1.25rem}
+.screen.on{display:block}
+
+.section-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px;margin-top:16px}
+.section-title:first-child{margin-top:0}
+.section-sub{font-size:11px;color:var(--color-text-secondary);margin-bottom:10px}
+
+.api-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:16px}
+.api-table th{text-align:left;padding:7px 10px;font-size:10px;font-weight:500;color:var(--color-text-secondary);background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.api-table td{padding:8px 10px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top;color:var(--color-text-primary)}
+.api-table tr:last-child td{border-bottom:none}
+.api-table tr:hover td{background:var(--color-background-secondary)}
+
+.method{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;font-family:var(--font-sans);min-width:44px;text-align:center}
+.get{background:#EFF6FF;color:#1D4ED8}
+.post{background:#E8F5EE;color:#1B7F4A}
+.patch{background:#FEF3C7;color:#D97706}
+.delete{background:#FEF2F2;color:#DC2626}
+
+.route{font-family:var(--font-sans);font-size:11px;color:var(--color-text-primary)}
+.route-param{color:#1B7F4A}
+.desc{font-size:11px;color:var(--color-text-secondary)}
+.auth-badge{font-size:10px;padding:1px 6px;border-radius:3px;margin-left:4px}
+.auth-pub{background:#F0FDF4;color:#16A34A}
+.auth-priv{background:#FEF3C7;color:#D97706}
+
+.env-block{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:16px}
+.env-group-header{padding:8px 12px;background:var(--color-background-tertiary);border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px;font-weight:500;color:var(--color-text-secondary);letter-spacing:.5px;text-transform:uppercase}
+.env-row{display:grid;grid-template-columns:1fr 1fr 80px;padding:7px 12px;border-bottom:0.5px solid var(--color-border-tertiary);align-items:start;gap:8px}
+.env-row:last-child{border-bottom:none}
+.env-key{font-family:var(--font-sans);font-size:11px;color:#1D4ED8}
+.env-val{font-size:11px;color:var(--color-text-secondary)}
+.env-req{font-size:10px;font-weight:500;padding:1px 6px;border-radius:3px;text-align:center}
+.req-yes{background:#E8F5EE;color:#1B7F4A}
+.req-rec{background:#FEF3C7;color:#D97706}
+.req-no{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+</style>
+
+<h2 class="sr-only">API Routes et variables d'environnement SamaDepot</h2>
+
+<div class="tabs">
+  <div class="tab on" onclick="show('api',this)">API Routes</div>
+  <div class="tab" onclick="show('env',this)">Variables d'environnement</div>
+</div>
+
+<div id="s-api" class="screen on">
+
+  <div class="section-title">Authentification</div>
+  <div class="section-sub">Gestion de la connexion et des sessions</div>
+  <table class="api-table">
+    <thead><tr><th>Méthode</th><th>Route</th><th>Description</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/auth/login</span></td><td class="desc">Connexion email + mot de passe — détecte l'université via le domaine</td><td><span class="auth-badge auth-pub">Public</span></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/auth/logout</span></td><td class="desc">Déconnexion — invalide la session JWT</td><td><span class="auth-badge auth-priv">Auth</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/auth/me</span></td><td class="desc">Retourne l'utilisateur connecté (profil + université + rôle)</td><td><span class="auth-badge auth-priv">Auth</span></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/auth/reset-password</span></td><td class="desc">Demande de réinitialisation du mot de passe par email</td><td><span class="auth-badge auth-pub">Public</span></td></tr>
+      <tr><td><span class="method get get">GET</span></td><td><span class="route">/api/auth/[...nextauth]</span></td><td class="desc">Handler NextAuth.js — gère OAuth callbacks et session</td><td><span class="auth-badge auth-pub">Public</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Espaces de dépôt</div>
+  <div class="section-sub">Créés par les professeurs — consultés par les étudiants</div>
+  <table class="api-table">
+    <thead><tr><th>Méthode</th><th>Route</th><th>Description</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/spaces</span></td><td class="desc">Liste les espaces actifs de l'université de l'utilisateur connecté</td><td><span class="auth-badge auth-priv">Student / Teacher</span></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/spaces</span></td><td class="desc">Crée un nouvel espace de dépôt (titre, type, deadline, formats, taille max)</td><td><span class="auth-badge auth-priv">Teacher</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/spaces/<span class="route-param">[id]</span></span></td><td class="desc">Détail d'un espace (infos + liste des dépôts reçus)</td><td><span class="auth-badge auth-priv">Teacher / Admin</span></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><span class="route">/api/spaces/<span class="route-param">[id]</span></span></td><td class="desc">Modifier un espace (deadline, titre, activation/désactivation)</td><td><span class="auth-badge auth-priv">Teacher</span></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><span class="route">/api/spaces/<span class="route-param">[id]</span></span></td><td class="desc">Supprimer un espace (uniquement si aucun dépôt reçu)</td><td><span class="auth-badge auth-priv">Teacher</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/spaces/<span class="route-param">[id]</span>/export</span></td><td class="desc">Exporter la liste des dépôts en CSV (nom, statut, date, note)</td><td><span class="auth-badge auth-priv">Teacher / Admin</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Dépôts (Submissions)</div>
+  <div class="section-sub">Table centrale — upload + suivi des fichiers</div>
+  <table class="api-table">
+    <thead><tr><th>Méthode</th><th>Route</th><th>Description</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/submissions</span></td><td class="desc">Mes dépôts (étudiant) ou tous les dépôts de mes espaces (prof)</td><td><span class="auth-badge auth-priv">Auth</span></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/submissions</span></td><td class="desc">Créer un dépôt — valide format/taille, génère hash SHA-256, sauvegarde en BDD</td><td><span class="auth-badge auth-priv">Student</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/submissions/<span class="route-param">[id]</span></span></td><td class="desc">Détail d'un dépôt (fichier, statut, review si existante)</td><td><span class="auth-badge auth-priv">Auth</span></td></tr>
+      <tr><td><span class="method delete">DELETE</span></td><td><span class="route">/api/submissions/<span class="route-param">[id]</span></span></td><td class="desc">Supprimer son dépôt (seulement si statut = received)</td><td><span class="auth-badge auth-priv">Student</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/submissions/<span class="route-param">[id]</span>/receipt</span></td><td class="desc">Générer et télécharger le récépissé PDF (horodatage + hash)</td><td><span class="auth-badge auth-priv">Student</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/submissions/<span class="route-param">[id]</span>/download</span></td><td class="desc">Générer une URL signée temporaire (15 min) pour télécharger le fichier</td><td><span class="auth-badge auth-priv">Teacher / Admin</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Upload fichiers</div>
+  <div class="section-sub">Endpoint dédié — validation + stockage Supabase Storage</div>
+  <table class="api-table">
+    <thead><tr><th>Méthode</th><th>Route</th><th>Description</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/upload</span></td><td class="desc">Upload un fichier — valide MIME type, taille, génère hash SHA-256, stocke dans Supabase Storage bucket privé</td><td><span class="auth-badge auth-priv">Student</span></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/upload/presigned</span></td><td class="desc">Génère une URL présignée pour upload direct côté client (fichiers > 10 Mo)</td><td><span class="auth-badge auth-priv">Student</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Évaluations (Reviews)</div>
+  <div class="section-sub">Retour du professeur sur chaque dépôt</div>
+  <table class="api-table">
+    <thead><tr><th>Méthode</th><th>Route</th><th>Description</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/submissions/<span class="route-param">[id]</span>/review</span></td><td class="desc">Soumettre une évaluation (décision + note optionnelle + commentaire)</td><td><span class="auth-badge auth-priv">Teacher</span></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><span class="route">/api/submissions/<span class="route-param">[id]</span>/review</span></td><td class="desc">Modifier une évaluation (seulement dans les 24h)</td><td><span class="auth-badge auth-priv">Teacher</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Notifications</div>
+  <div class="section-sub">WhatsApp, email, in-app</div>
+  <table class="api-table">
+    <thead><tr><th>Méthode</th><th>Route</th><th>Description</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/notifications</span></td><td class="desc">Lister mes notifications non lues (in-app)</td><td><span class="auth-badge auth-priv">Auth</span></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><span class="route">/api/notifications/<span class="route-param">[id]</span>/read</span></td><td class="desc">Marquer une notification comme lue</td><td><span class="auth-badge auth-priv">Auth</span></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/whatsapp/webhook</span></td><td class="desc">Webhook WhatsApp Business — réception messages entrants</td><td><span class="auth-badge auth-pub">Public</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/whatsapp/webhook</span></td><td class="desc">Vérification du webhook par Meta (setup unique)</td><td><span class="auth-badge auth-pub">Public</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Administration université</div>
+  <div class="section-sub">Gestion des utilisateurs, départements et statistiques</div>
+  <table class="api-table">
+    <thead><tr><th>Méthode</th><th>Route</th><th>Description</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/admin/stats</span></td><td class="desc">KPIs de l'université (dépôts, utilisateurs, stockage)</td><td><span class="auth-badge auth-priv">Admin</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/admin/users</span></td><td class="desc">Lister les utilisateurs de l'université (filtres : rôle, département)</td><td><span class="auth-badge auth-priv">Admin</span></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/admin/users</span></td><td class="desc">Créer un compte utilisateur (étudiant ou prof)</td><td><span class="auth-badge auth-priv">Admin</span></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><span class="route">/api/admin/users/<span class="route-param">[id]</span></span></td><td class="desc">Modifier ou suspendre un compte</td><td><span class="auth-badge auth-priv">Admin</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/admin/departments</span></td><td class="desc">Lister les départements de l'université</td><td><span class="auth-badge auth-priv">Admin</span></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/admin/departments</span></td><td class="desc">Créer un département/filière</td><td><span class="auth-badge auth-priv">Admin</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Super Admin (toi)</div>
+  <div class="section-sub">Gestion globale de la plateforme</div>
+  <table class="api-table">
+    <thead><tr><th>Méthode</th><th>Route</th><th>Description</th><th>Accès</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/superadmin/stats</span></td><td class="desc">Statistiques nationales (universités, dépôts totaux, stockage global)</td><td><span class="auth-badge auth-priv">Superadmin</span></td></tr>
+      <tr><td><span class="method get">GET</span></td><td><span class="route">/api/superadmin/universities</span></td><td class="desc">Lister toutes les universités inscrites</td><td><span class="auth-badge auth-priv">Superadmin</span></td></tr>
+      <tr><td><span class="method post">POST</span></td><td><span class="route">/api/superadmin/universities</span></td><td class="desc">Inscrire une nouvelle université sur la plateforme</td><td><span class="auth-badge auth-priv">Superadmin</span></td></tr>
+      <tr><td><span class="method patch">PATCH</span></td><td><span class="route">/api/superadmin/universities/<span class="route-param">[id]</span></span></td><td class="desc">Activer/suspendre une université, modifier son plan</td><td><span class="auth-badge auth-priv">Superadmin</span></td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<div id="s-env" class="screen">
+
+  <div class="env-block">
+    <div class="env-group-header">Authentification</div>
+    <div class="env-row"><span class="env-key">NEXTAUTH_SECRET</span><span class="env-val">Clé secrète JWT — générer avec : openssl rand -base64 32</span><span class="env-req req-yes">Requis</span></div>
+    <div class="env-row"><span class="env-key">NEXTAUTH_URL</span><span class="env-val">URL du site — ex: https://samadepot.sn (ou http://localhost:3000 en dev)</span><span class="env-req req-yes">Requis</span></div>
+  </div>
+
+  <div class="env-block">
+    <div class="env-group-header">Supabase — Base de données & stockage</div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SUPABASE_URL</span><span class="env-val">URL du projet Supabase — ex: https://xxxx.supabase.co</span><span class="env-req req-yes">Requis</span></div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SUPABASE_ANON_KEY</span><span class="env-val">Clé publique (anon) — lecture seule soumise au RLS</span><span class="env-req req-yes">Requis</span></div>
+    <div class="env-row"><span class="env-key">SUPABASE_SERVICE_ROLE_KEY</span><span class="env-val">Clé admin — bypass RLS — JAMAIS exposée côté client</span><span class="env-req req-yes">Requis</span></div>
+    <div class="env-row"><span class="env-key">SUPABASE_STORAGE_BUCKET</span><span class="env-val">Nom du bucket privé pour les fichiers — ex: submissions</span><span class="env-req req-yes">Requis</span></div>
+    <div class="env-row"><span class="env-key">SUPABASE_STORAGE_BUCKET_RECEIPTS</span><span class="env-val">Bucket pour les récépissés PDF — ex: receipts</span><span class="env-req req-yes">Requis</span></div>
+  </div>
+
+  <div class="env-block">
+    <div class="env-group-header">WhatsApp Business API (Meta)</div>
+    <div class="env-row"><span class="env-key">WHATSAPP_PHONE_ID</span><span class="env-val">ID du numéro WhatsApp Business — depuis Meta for Developers</span><span class="env-req req-yes">Requis prod</span></div>
+    <div class="env-row"><span class="env-key">WHATSAPP_TOKEN</span><span class="env-val">Token d'accès permanent WhatsApp Business API</span><span class="env-req req-yes">Requis prod</span></div>
+    <div class="env-row"><span class="env-key">WHATSAPP_VERIFY_TOKEN</span><span class="env-val">Token de vérification webhook — valeur aléatoire de ton choix</span><span class="env-req req-yes">Requis prod</span></div>
+  </div>
+
+  <div class="env-block">
+    <div class="env-group-header">Emails transactionnels (Resend)</div>
+    <div class="env-row"><span class="env-key">RESEND_API_KEY</span><span class="env-val">Clé API Resend — depuis resend.com</span><span class="env-req req-yes">Requis</span></div>
+    <div class="env-row"><span class="env-key">RESEND_FROM_EMAIL</span><span class="env-val">Email expéditeur — ex: noreply@samadepot.sn</span><span class="env-req req-yes">Requis</span></div>
+  </div>
+
+  <div class="env-block">
+    <div class="env-group-header">Configuration upload</div>
+    <div class="env-row"><span class="env-key">MAX_FILE_SIZE_MB</span><span class="env-val">Taille max par défaut en Mo — ex: 100</span><span class="env-req req-yes">Requis</span></div>
+    <div class="env-row"><span class="env-key">ALLOWED_MIME_TYPES</span><span class="env-val">Types MIME autorisés — ex: application/pdf,application/zip,...</span><span class="env-req req-yes">Requis</span></div>
+    <div class="env-row"><span class="env-key">SIGNED_URL_EXPIRY_SECONDS</span><span class="env-val">Durée de validité des URLs signées — ex: 900 (15 min)</span><span class="env-req req-rec">Recommandé</span></div>
+  </div>
+
+  <div class="env-block">
+    <div class="env-group-header">Site & application</div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SITE_URL</span><span class="env-val">URL publique du site — ex: https://samadepot.sn</span><span class="env-req req-yes">Requis</span></div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_APP_NAME</span><span class="env-val">Nom de l'application — SamaDepot</span><span class="env-req req-rec">Recommandé</span></div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_SUPPORT_EMAIL</span><span class="env-val">Email de support affiché aux utilisateurs</span><span class="env-req req-rec">Recommandé</span></div>
+  </div>
+
+  <div class="env-block">
+    <div class="env-group-header">Analytics & monitoring (optionnel)</div>
+    <div class="env-row"><span class="env-key">NEXT_PUBLIC_GA_ID</span><span class="env-val">Google Analytics 4 Measurement ID — ex: G-XXXXXXXXXX</span><span class="env-req req-no">Optionnel</span></div>
+    <div class="env-row"><span class="env-key">SENTRY_DSN</span><span class="env-val">DSN Sentry pour le suivi des erreurs en production</span><span class="env-req req-no">Optionnel</span></div>
+    <div class="env-row"><span class="env-key">SENTRY_AUTH_TOKEN</span><span class="env-val">Token Sentry pour l'upload des source maps</span><span class="env-req req-no">Optionnel</span></div>
+  </div>
+
+</div>
+
+<script>
+function show(name, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('s-'+name).classList.add('on');
+  el.classList.add('on');
+}
+</script>
