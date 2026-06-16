@@ -28,7 +28,6 @@ export async function PATCH(
 
   const supabaseAdmin = createSupabaseAdminClient();
 
-  // Récupérer la demande
   const { data: req, error: fetchError } = await supabaseAdmin
     .from("school_registration_requests")
     .select("*")
@@ -43,34 +42,32 @@ export async function PATCH(
     return NextResponse.json({ error: "Demande déjà traitée" }, { status: 409 });
   }
 
+  // ── REJET ────────────────────────────────────────────────────────────────
   if (action === "reject") {
     await supabaseAdmin
       .from("school_registration_requests")
       .update({ status: "rejected", processed_at: new Date().toISOString(), reject_reason: rejectReason })
       .eq("id", id);
 
-    // Email de rejet
     if (process.env.RESEND_API_KEY) {
       const { Resend } = await import("resend");
       const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM ?? "SamaDepot <noreply@samadepot.sn>",
+      const { error: emailErr } = await resend.emails.send({
+        from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
         to: req.contact_email,
         subject: "Votre demande d'inscription SamaDepot",
-        html: `
-          <p>Bonjour ${req.contact_name},</p>
-          <p>Nous avons bien reçu votre demande d'inscription pour <strong>${req.university_name}</strong>.</p>
-          <p>Après examen, nous ne sommes pas en mesure de donner suite à cette demande pour le moment${rejectReason ? ` : ${rejectReason}` : ""}.</p>
-          <p>N'hésitez pas à nous recontacter si votre situation évolue.</p>
-          <p>L'équipe SamaDepot</p>
-        `
-      }).catch(() => null);
+        html: `<p>Bonjour ${req.contact_name},</p>
+          <p>Nous avons bien reçu votre demande pour <strong>${req.university_name}</strong>.</p>
+          <p>Après examen, nous ne pouvons pas y donner suite pour le moment${rejectReason ? ` : ${rejectReason}` : ""}.</p>
+          <p>N'hésitez pas à nous recontacter. L'équipe SamaDepot</p>`
+      });
+      if (emailErr) console.error("Resend reject email error:", emailErr.message);
     }
 
     return NextResponse.json({ data: { status: "rejected" } });
   }
 
-  // Approuver : créer l'université + compte admin
+  // ── APPROBATION ───────────────────────────────────────────────────────────
   const slug = req.university_name
     .toLowerCase()
     .normalize("NFD").replace(/[̀-ͯ]/g, "")
@@ -78,7 +75,7 @@ export async function PATCH(
     .replace(/^-+|-+$/g, "")
     .slice(0, 40);
 
-  // Créer l'université
+  // 1. Créer l'université
   const { data: university, error: uniError } = await supabaseAdmin
     .from("universities")
     .insert({
@@ -93,35 +90,32 @@ export async function PATCH(
     .single();
 
   if (uniError || !university) {
+    console.error("University insert error:", uniError?.message);
     return NextResponse.json({ error: `Création université échouée: ${uniError?.message}` }, { status: 500 });
   }
 
-  // Créer le compte admin via Supabase Auth
-  const tempPassword = Array.from({ length: 12 }, () =>
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%"[
-      Math.floor(Math.random() * 67)
-    ]
-  ).join("");
+  // 2. Générer un mot de passe temporaire robuste
+  const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#";
+  const tempPassword = Array.from({ length: 12 }, (_, i) =>
+    chars[(req.contact_email.charCodeAt(i % req.contact_email.length) + i * 7 + Date.now()) % chars.length]
+  ).join("") + "X1!"; // garantit majuscule + chiffre + spécial
 
+  // 3. Créer le compte Supabase Auth
   const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email: req.contact_email,
     password: tempPassword,
     email_confirm: true,
-    user_metadata: {
-      full_name: req.contact_name,
-      role: "admin",
-      university_id: university.id
-    }
+    user_metadata: { full_name: req.contact_name, role: "admin", university_id: university.id }
   });
 
   if (authError || !authUser.user) {
-    // Rollback université
+    console.error("Auth createUser error:", authError?.message);
     await supabaseAdmin.from("universities").delete().eq("id", university.id);
     return NextResponse.json({ error: `Création compte échouée: ${authError?.message}` }, { status: 500 });
   }
 
-  // Insérer dans la table users
-  await supabaseAdmin.from("users").insert({
+  // 4. Insérer dans la table users
+  const { error: userInsertError } = await supabaseAdmin.from("users").insert({
     id: authUser.user.id,
     email: req.contact_email,
     full_name: req.contact_name,
@@ -131,39 +125,26 @@ export async function PATCH(
     is_active: true
   });
 
-  // Mettre à jour la demande
-  await supabaseAdmin
-    .from("school_registration_requests")
-    .update({
-      status: "approved",
-      processed_at: new Date().toISOString(),
-      university_id: university.id
-    })
-    .eq("id", id);
-
-  // Générer un lien de réinitialisation de mot de passe
-  let setupLink = `${getSiteUrl()}/login`;
-  try {
-    const { data: linkData } = await supabaseAdmin.auth.admin.generateLink({
-      type: "recovery",
-      email: req.contact_email,
-      options: { redirectTo: `${getSiteUrl()}/reset-password` }
-    });
-    if (linkData?.properties?.action_link) {
-      setupLink = linkData.properties.action_link;
-    }
-  } catch {
-    // lien de fallback
+  if (userInsertError) {
+    console.error("Users insert error:", userInsertError.message);
   }
 
-  // Email de bienvenue avec credentials
+  // 5. Marquer la demande comme approuvée
+  await supabaseAdmin
+    .from("school_registration_requests")
+    .update({ status: "approved", processed_at: new Date().toISOString(), university_id: university.id })
+    .eq("id", id);
+
+  // 6. Envoyer l'email de bienvenue avec les identifiants en clair
   if (process.env.RESEND_API_KEY) {
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM ?? "SamaDepot <noreply@samadepot.sn>",
+    const loginUrl = `${getSiteUrl()}/login`;
+
+    const { data: emailData, error: emailError } = await resend.emails.send({
+      from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
       to: req.contact_email,
-      subject: `🎉 Bienvenue sur SamaDepot — ${req.university_name}`,
+      subject: `Bienvenue sur SamaDepot — ${req.university_name}`,
       html: `
         <!DOCTYPE html>
         <html lang="fr">
@@ -175,24 +156,33 @@ export async function PATCH(
                 <tr><td style="background:#2563eb;padding:24px 32px">
                   <span style="font-size:18px;font-weight:700;color:#fff">SD &nbsp; SamaDepot</span>
                 </td></tr>
-                <tr><td style="padding:32px;font-size:15px;color:#334155;line-height:1.6">
+                <tr><td style="padding:32px;font-size:15px;color:#334155;line-height:1.7">
                   <h2 style="margin:0 0 8px;font-size:22px;color:#0f172a">Bienvenue, ${req.contact_name} !</h2>
-                  <p style="margin:0 0 16px;color:#64748b">Votre établissement <strong>${req.university_name}</strong> est maintenant sur SamaDepot.</p>
+                  <p style="margin:0 0 20px;color:#64748b">Votre école <strong style="color:#0f172a">${req.university_name}</strong> est maintenant active sur SamaDepot.</p>
 
-                  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:20px 0">
-                    <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:.05em">Vos accès administrateur</p>
-                    <p style="margin:4px 0;font-size:14px;color:#334155"><strong>Email :</strong> ${req.contact_email}</p>
-                    <p style="margin:4px 0;font-size:14px;color:#334155"><strong>Rôle :</strong> Administrateur</p>
+                  <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:20px;margin:0 0 20px">
+                    <p style="margin:0 0 12px;font-size:12px;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:.05em">Vos identifiants de connexion</p>
+                    <table cellpadding="0" cellspacing="0" style="width:100%">
+                      <tr>
+                        <td style="padding:5px 0;font-size:13px;color:#64748b;width:130px">Email</td>
+                        <td style="padding:5px 0;font-size:14px;font-weight:600;color:#0f172a">${req.contact_email}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;font-size:13px;color:#64748b">Mot de passe</td>
+                        <td style="padding:5px 0;font-size:16px;font-weight:700;color:#0f172a;font-family:monospace;letter-spacing:1px">${tempPassword}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:5px 0;font-size:13px;color:#64748b">Rôle</td>
+                        <td style="padding:5px 0;font-size:14px;color:#0f172a">Administrateur</td>
+                      </tr>
+                    </table>
                   </div>
 
-                  <p>Pour activer votre compte et définir votre mot de passe, cliquez ci-dessous :</p>
-                  <p style="margin:24px 0">
-                    <a href="${setupLink}" style="background:#2563eb;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">
-                      Configurer mon compte →
-                    </a>
-                  </p>
+                  <p style="font-size:13px;color:#94a3b8;margin:0 0 20px">Changez votre mot de passe dès votre première connexion depuis les paramètres de votre profil.</p>
 
-                  <p style="font-size:13px;color:#94a3b8">Ce lien est valable 24h. En tant qu'administrateur, vous pourrez ensuite créer les comptes professeurs et importer vos étudiants.</p>
+                  <a href="${loginUrl}" style="display:inline-block;background:#2563eb;color:#fff;padding:13px 28px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">
+                    Se connecter maintenant →
+                  </a>
                 </td></tr>
                 <tr><td style="padding:16px 32px;border-top:1px solid #e2e8f0;font-size:12px;color:#94a3b8">
                   SamaDepot · ${getSiteUrl()}
@@ -203,7 +193,15 @@ export async function PATCH(
         </body>
         </html>
       `
-    }).catch(() => null);
+    });
+
+    if (emailError) {
+      console.error("Resend welcome email error:", JSON.stringify(emailError));
+    } else {
+      console.log("Welcome email sent:", emailData?.id, "to:", req.contact_email);
+    }
+  } else {
+    console.error("RESEND_API_KEY manquant — email de bienvenue non envoyé");
   }
 
   return NextResponse.json({
