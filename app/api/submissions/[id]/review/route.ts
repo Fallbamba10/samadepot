@@ -6,6 +6,7 @@ import {
   hasSupabaseAdminConfig
 } from "@/lib/supabase-admin";
 import { reviewSubmissionSchema } from "@/lib/validation";
+import { sendReviewNotificationEmail } from "@/lib/email";
 
 const statusByDecision = {
   validate: "validated",
@@ -119,6 +120,37 @@ export async function POST(
     old_value: { status: submission.status },
     new_value: { status: nextStatus, decision: parsed.data.decision }
   });
+
+  // Email à l'étudiant en arrière-plan
+  void supabaseAdmin
+    .from("submissions")
+    .select("student_id,file_name,submission_spaces(title)")
+    .eq("id", id)
+    .single()
+    .then(async ({ data: sub }) => {
+      if (!sub) return;
+      const spaceTitle = Array.isArray(sub.submission_spaces)
+        ? (sub.submission_spaces[0] as any)?.title
+        : (sub.submission_spaces as any)?.title ?? "Dépôt";
+      const { data: student } = await supabaseAdmin
+        .from("users")
+        .select("email,full_name")
+        .eq("id", sub.student_id)
+        .single();
+      if (student?.email) {
+        await sendReviewNotificationEmail({
+          studentEmail: student.email,
+          studentName: student.full_name ?? "Étudiant",
+          teacherName: user.fullName,
+          spaceTitle,
+          decision: parsed.data.decision,
+          grade: parsed.data.grade,
+          comment: parsed.data.comment,
+          submissionId: id
+        });
+      }
+    })
+    .then(() => null, () => null);
 
   return NextResponse.json({
     data: {

@@ -114,12 +114,13 @@ export async function AppShell({
                 <LogOut className="h-4 w-4" />
               </button>
             </form>
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600"
-              title={user?.fullName}
+            <a
+              href="/profile"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-600 transition hover:ring-2 hover:ring-brand-300"
+              title={user?.fullName ?? "Mon profil"}
             >
               {initials}
-            </div>
+            </a>
             {/* Mobile nav toggle — visible uniquement sur mobile */}
             <details className="relative lg:hidden">
               <summary className="focus-ring flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-md border border-line bg-white text-muted hover:text-ink">

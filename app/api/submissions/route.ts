@@ -7,6 +7,7 @@ import {
   createSupabaseAdminClient,
   hasSupabaseAdminConfig
 } from "@/lib/supabase-admin";
+import { sendSubmissionReceivedEmail } from "@/lib/email";
 
 export async function GET() {
   const currentUser = await getCurrentUser();
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
   const supabaseAdmin = createSupabaseAdminClient();
   const { data: space, error: spaceError } = await supabaseAdmin
     .from("submission_spaces")
-    .select("id,university_id,deadline,formats_allowed,max_size_mb,allow_late,is_active")
+    .select("id,university_id,teacher_id,title,type,deadline,formats_allowed,max_size_mb,allow_late,is_active")
     .eq("id", spaceId)
     .single();
 
@@ -153,6 +154,29 @@ export async function POST(request: Request) {
     await supabaseAdmin.storage.from(bucket).remove([storagePath]);
     return NextResponse.json({ error: submissionError.message }, { status: 400 });
   }
+
+  // Notifie le prof par email en arrière-plan
+  void supabaseAdmin
+    .from("users")
+    .select("email,full_name")
+    .eq("id", (space as any).teacher_id)
+    .single()
+    .then(({ data: teacher }) => {
+      if (teacher?.email) {
+        return sendSubmissionReceivedEmail({
+          teacherEmail: teacher.email,
+          teacherName: teacher.full_name ?? "Professeur",
+          studentName: currentUser.fullName,
+          spaceTitle: (space as any).title ?? space.id,
+          spaceType: (space as any).type ?? "",
+          submissionId: (submission as any).id,
+          fileName: file.name,
+          submittedAt: new Date().toLocaleString("fr-FR"),
+          isLate: Boolean(isLate)
+        });
+      }
+    })
+    .then(() => null, () => null);
 
   return NextResponse.json(
     {
