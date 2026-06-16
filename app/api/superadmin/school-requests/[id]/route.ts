@@ -197,11 +197,32 @@ export async function PATCH(
 
     if (emailError) {
       console.error("Resend welcome email error:", JSON.stringify(emailError));
-    } else {
-      console.log("Welcome email sent:", emailData?.id, "to:", req.contact_email);
+      // On retourne quand même succès (université créée) mais avec le détail de l'erreur email
+      return NextResponse.json({
+        data: {
+          status: "approved",
+          universityId: university.id,
+          universityName: university.name,
+          adminEmail: req.contact_email,
+          emailError: emailError.message,
+          tempPassword // exposé pour que le superadmin puisse le copier si email échoue
+        }
+      });
     }
+
+    console.log("Welcome email sent:", emailData?.id, "to:", req.contact_email);
   } else {
     console.error("RESEND_API_KEY manquant — email de bienvenue non envoyé");
+    return NextResponse.json({
+      data: {
+        status: "approved",
+        universityId: university.id,
+        universityName: university.name,
+        adminEmail: req.contact_email,
+        emailError: "RESEND_API_KEY non configuré",
+        tempPassword
+      }
+    });
   }
 
   return NextResponse.json({

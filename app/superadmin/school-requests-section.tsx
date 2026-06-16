@@ -94,11 +94,13 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
   const [busy, setBusy] = useState<"approve" | "reject" | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailWarning, setEmailWarning] = useState<{ error: string; password: string } | null>(null);
   const isPending = request.status === "pending";
 
   async function handleAction(action: "approve" | "reject", reason = "") {
     setBusy(action);
     setError(null);
+    setEmailWarning(null);
     try {
       const res = await fetch(`/api/superadmin/school-requests/${request.id}`, {
         method: "PATCH",
@@ -109,6 +111,10 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
       if (!res.ok) {
         setError(json.error ?? "Erreur inconnue");
       } else {
+        // Université créée, mais email a peut-être échoué
+        if (json.data?.emailError) {
+          setEmailWarning({ error: json.data.emailError, password: json.data.tempPassword ?? "" });
+        }
         onActionDone(request.id, action === "approve" ? "approved" : "rejected");
       }
     } catch {
@@ -181,6 +187,17 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
         {error && (
           <div className="mb-3 rounded-lg bg-coral-50 px-3 py-2 text-xs text-coral-500">
             {error}
+          </div>
+        )}
+
+        {emailWarning && (
+          <div className="mb-3 rounded-lg bg-saffron-50 border border-saffron-200 px-3 py-3 text-xs text-saffron-600 space-y-1.5">
+            <p className="font-bold">⚠️ Université créée mais email non envoyé</p>
+            <p>Erreur Resend : {emailWarning.error}</p>
+            {emailWarning.password && (
+              <p>Mot de passe temporaire : <span className="font-mono font-bold bg-white px-2 py-0.5 rounded border border-saffron-200 select-all">{emailWarning.password}</span></p>
+            )}
+            <p className="text-saffron-500">Transmets ces identifiants manuellement à l'école.</p>
           </div>
         )}
 
