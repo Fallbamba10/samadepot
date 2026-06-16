@@ -456,9 +456,6 @@ async function filterSpacesForUser(
   }
 
   const classIds = (memberships ?? []).map((item: any) => item.class_id);
-  if (classIds.length === 0) {
-    return [];
-  }
 
   const { data: links, error: linksError } = await supabaseAdmin
     .from("submission_space_classes")
@@ -472,13 +469,16 @@ async function filterSpacesForUser(
     return spacesData;
   }
 
+  // Espaces qui ont au moins une classe associée
   const linkedSpaceIds = new Set((links ?? []).map((item: any) => item.space_id));
+  // Espaces dont l'étudiant fait partie via sa classe
   const visibleSpaceIds = new Set(
     (links ?? [])
       .filter((item: any) => classIds.includes(item.class_id))
       .map((item: any) => item.space_id)
   );
 
+  // Visible si : l'étudiant est dans la bonne classe OU l'espace n'est lié à aucune classe
   return spacesData.filter(
     (space) => visibleSpaceIds.has(space.id) || !linkedSpaceIds.has(space.id)
   );

@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { CalendarClock, FileText, Upload } from "lucide-react";
+import { CalendarClock, FileText, Upload, Eye } from "lucide-react";
 import type { SubmissionSpace } from "@/types";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const deadlineBg = {
@@ -81,10 +80,13 @@ export function SpaceCard({
       {/* Bouton */}
       <div className="mt-5 flex gap-2">
         {mode === "teacher" ? (
-          <>
-            <Button className="flex-1">Voir dépôts</Button>
-            <Button variant="secondary">Exporter</Button>
-          </>
+          <Link
+            href={`/teacher/spaces/${space.id}`}
+            className="focus-ring inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-brand-600 text-sm font-semibold text-white transition hover:bg-brand-500"
+          >
+            <Eye className="h-4 w-4" />
+            Voir les dépôts
+          </Link>
         ) : isExpired ? (
           <span className="inline-flex h-10 flex-1 items-center justify-center rounded-xl border border-line bg-slate-50 text-sm font-semibold text-muted">
             Dépôt fermé

@@ -1,10 +1,12 @@
 import { AppShell } from "@/components/app-shell";
 import { SpacesClient } from "./spaces-client";
 import { getSpaces } from "@/lib/data";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function SpacesPage() {
-  const spaces = await getSpaces();
+  const [spaces, user] = await Promise.all([getSpaces(), getCurrentUser()]);
   const open = spaces.filter((s) => s.status !== "expired").length;
+  const role = user?.role ?? "student";
 
   return (
     <AppShell active="Espaces">
@@ -16,7 +18,7 @@ export default async function SpacesPage() {
             : "Aucun espace ouvert pour le moment"}
         </p>
       </div>
-      <SpacesClient spaces={spaces} />
+      <SpacesClient spaces={spaces} role={role} />
     </AppShell>
   );
 }

@@ -22,7 +22,7 @@ const STATUS_LABELS: Record<string, string> = {
   urgent: "Urgent"
 };
 
-export function SpacesClient({ spaces }: { spaces: SubmissionSpace[] }) {
+export function SpacesClient({ spaces, role = "student" }: { spaces: SubmissionSpace[]; role?: string }) {
   const [query, setQuery] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
@@ -131,7 +131,7 @@ export function SpacesClient({ spaces }: { spaces: SubmissionSpace[] }) {
               </div>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {open.map((space) => (
-                  <SpaceCard key={space.id} space={space} />
+                  <SpaceCard key={space.id} space={space} mode={role === "teacher" || role === "admin" || role === "superadmin" ? "teacher" : "student"} />
                 ))}
               </div>
             </section>
@@ -147,7 +147,7 @@ export function SpacesClient({ spaces }: { spaces: SubmissionSpace[] }) {
               </div>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {expired.map((space) => (
-                  <SpaceCard key={space.id} space={space} />
+                  <SpaceCard key={space.id} space={space} mode={role === "teacher" || role === "admin" || role === "superadmin" ? "teacher" : "student"} />
                 ))}
               </div>
             </section>
