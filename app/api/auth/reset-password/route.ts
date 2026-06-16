@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { hasSupabaseConfig, getSiteUrl } from "@/lib/env";
-import { createSupabaseAdminClient, hasSupabaseAdminConfig } from "@/lib/supabase-admin";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -10,12 +10,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email invalide" }, { status: 400 });
   }
 
-  if (!hasSupabaseConfig() || !hasSupabaseAdminConfig()) {
+  if (!hasSupabaseConfig()) {
     return NextResponse.json({ data: { message: "Email envoyé (mode démo)" } });
   }
 
-  const supabaseAdmin = createSupabaseAdminClient();
-  const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${getSiteUrl()}/login?reset=1`
   });
 
