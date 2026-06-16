@@ -5,10 +5,12 @@ import {
   BadgeCheck,
   Building2,
   Calendar,
+  Check,
   CheckCircle2,
   ChevronDown,
-  Globe,
+  Copy,
   Mail,
+  MessageCircle,
   Phone,
   Users,
   X,
@@ -29,6 +31,123 @@ type SchoolRequest = {
   rejectReason?: string | null;
 };
 
+type ApprovedCredentials = {
+  email: string;
+  password: string;
+  universityName: string;
+  emailSent: boolean;
+};
+
+function CopyButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+  function copy() {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+  return (
+    <button
+      onClick={copy}
+      className="ml-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-line bg-white text-muted transition hover:text-ink"
+      title="Copier"
+    >
+      {copied ? <Check className="h-3 w-3 text-brand-600" /> : <Copy className="h-3 w-3" />}
+    </button>
+  );
+}
+
+function CredentialsCard({ creds, onClose }: { creds: ApprovedCredentials; onClose: () => void }) {
+  const whatsappText = encodeURIComponent(
+    `Bonjour ${creds.universityName} 👋\n\nVotre école est maintenant active sur SamaDepot !\n\n` +
+    `🔗 Lien : https://samadepot.vercel.app/login\n` +
+    `📧 Email : ${creds.email}\n` +
+    `🔑 Mot de passe temporaire : ${creds.password}\n\n` +
+    `Connectez-vous et changez votre mot de passe depuis votre profil.`
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl border border-line bg-white shadow-xl">
+        {/* En-tête */}
+        <div className="flex items-center justify-between border-b border-line px-5 py-4">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-brand-600" />
+            <h2 className="text-sm font-bold text-ink">École approuvée — Identifiants</h2>
+          </div>
+          <button onClick={onClose} className="text-muted hover:text-ink">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="px-5 py-5 space-y-4">
+          {!creds.emailSent && (
+            <div className="rounded-xl bg-saffron-50 border border-saffron-200 px-4 py-3 text-xs text-saffron-600">
+              <p className="font-bold mb-1">Email de bienvenue non envoyé</p>
+              <p>Transmets les identifiants ci-dessous manuellement (copie ou WhatsApp).</p>
+            </div>
+          )}
+
+          {creds.emailSent && (
+            <div className="rounded-xl bg-brand-50 border border-brand-100 px-4 py-3 text-xs text-brand-600">
+              <p className="font-bold mb-1">Email de bienvenue envoyé ✓</p>
+              <p>L'admin a reçu ses identifiants par email. Tu peux aussi les partager ci-dessous.</p>
+            </div>
+          )}
+
+          {/* Identifiants */}
+          <div className="rounded-xl border border-line bg-slate-50 p-4 space-y-3">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-muted">Identifiants de connexion</p>
+
+            <div>
+              <p className="text-[11px] text-muted mb-1">Email</p>
+              <div className="flex items-center justify-between rounded-lg border border-line bg-white px-3 py-2">
+                <span className="text-sm font-semibold text-ink">{creds.email}</span>
+                <CopyButton value={creds.email} />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[11px] text-muted mb-1">Mot de passe temporaire</p>
+              <div className="flex items-center justify-between rounded-lg border border-line bg-white px-3 py-2">
+                <span className="text-sm font-bold font-mono tracking-wider text-ink">{creds.password}</span>
+                <CopyButton value={creds.password} />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[11px] text-muted mb-1">Lien de connexion</p>
+              <div className="flex items-center justify-between rounded-lg border border-line bg-white px-3 py-2">
+                <span className="text-sm text-ink">samadepot.vercel.app/login</span>
+                <CopyButton value="https://samadepot.vercel.app/login" />
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            <a
+              href={`https://wa.me/?text=${whatsappText}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Envoyer sur WhatsApp
+            </a>
+            <button
+              onClick={onClose}
+              className="flex-1 rounded-xl border border-line py-3 text-sm font-semibold text-muted hover:text-ink"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RejectModal({
   request,
   onClose,
@@ -41,11 +160,6 @@ function RejectModal({
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function handleConfirm() {
-    setBusy(true);
-    onConfirm(reason);
-  }
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="w-full max-w-md rounded-2xl border border-line bg-white shadow-xl">
@@ -57,10 +171,10 @@ function RejectModal({
         </div>
         <div className="px-5 py-4">
           <p className="text-sm text-muted mb-3">
-            Demande de <strong className="text-ink">{request.universityName}</strong> ({request.contactEmail})
+            Demande de <strong className="text-ink">{request.universityName}</strong>
           </p>
           <label className="mb-1.5 block text-xs font-semibold text-ink">
-            Raison du rejet <span className="font-normal text-muted">(optionnel)</span>
+            Raison <span className="font-normal text-muted">(optionnel)</span>
           </label>
           <textarea
             value={reason}
@@ -71,14 +185,11 @@ function RejectModal({
           />
         </div>
         <div className="flex gap-3 border-t border-line px-5 py-4">
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-xl border border-line py-2.5 text-sm font-semibold text-muted hover:text-ink"
-          >
+          <button onClick={onClose} className="flex-1 rounded-xl border border-line py-2.5 text-sm font-semibold text-muted hover:text-ink">
             Annuler
           </button>
           <button
-            onClick={handleConfirm}
+            onClick={() => { setBusy(true); onConfirm(reason); }}
             disabled={busy}
             className="flex-1 rounded-xl bg-coral-500 py-2.5 text-sm font-semibold text-white transition hover:bg-coral-600 disabled:opacity-60"
           >
@@ -90,17 +201,19 @@ function RejectModal({
   );
 }
 
-function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActionDone: (id: string, newStatus: "approved" | "rejected") => void }) {
+function RequestCard({ request, onActionDone }: {
+  request: SchoolRequest;
+  onActionDone: (id: string, newStatus: "approved" | "rejected") => void;
+}) {
   const [busy, setBusy] = useState<"approve" | "reject" | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [emailWarning, setEmailWarning] = useState<{ error: string; password: string } | null>(null);
+  const [credentials, setCredentials] = useState<ApprovedCredentials | null>(null);
   const isPending = request.status === "pending";
 
   async function handleAction(action: "approve" | "reject", reason = "") {
     setBusy(action);
     setError(null);
-    setEmailWarning(null);
     try {
       const res = await fetch(`/api/superadmin/school-requests/${request.id}`, {
         method: "PATCH",
@@ -111,9 +224,13 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
       if (!res.ok) {
         setError(json.error ?? "Erreur inconnue");
       } else {
-        // Université créée, mais email a peut-être échoué
-        if (json.data?.emailError) {
-          setEmailWarning({ error: json.data.emailError, password: json.data.tempPassword ?? "" });
+        if (action === "approve") {
+          setCredentials({
+            email: json.data?.adminEmail ?? request.contactEmail,
+            password: json.data?.tempPassword ?? "",
+            universityName: request.universityName,
+            emailSent: !json.data?.emailError
+          });
         }
         onActionDone(request.id, action === "approve" ? "approved" : "rejected");
       }
@@ -126,9 +243,9 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
   }
 
   const statusMeta = {
-    pending:  { label: "En attente",  color: "bg-saffron-50 text-saffron-500" },
-    approved: { label: "Approuvée",   color: "bg-brand-50 text-brand-600" },
-    rejected: { label: "Rejetée",     color: "bg-coral-50 text-coral-500" }
+    pending:  { label: "En attente", color: "bg-saffron-50 text-saffron-500" },
+    approved: { label: "Approuvée",  color: "bg-brand-50 text-brand-600" },
+    rejected: { label: "Rejetée",    color: "bg-coral-50 text-coral-500" }
   };
   const meta = statusMeta[request.status];
 
@@ -139,7 +256,7 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
         isPending ? "border-line hover:shadow-soft" : "border-line opacity-70"
       )}>
         {/* En-tête */}
-        <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="mb-3 flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-sm font-bold text-brand-600">
               {request.universityName.slice(0, 2).toUpperCase()}
@@ -155,7 +272,7 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
         </div>
 
         {/* Infos contact */}
-        <div className="space-y-1.5 mb-4">
+        <div className="mb-4 space-y-1.5">
           <div className="flex items-center gap-2 text-xs text-muted">
             <Mail className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{request.contactName} — {request.contactEmail}</span>
@@ -190,17 +307,6 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
           </div>
         )}
 
-        {emailWarning && (
-          <div className="mb-3 rounded-lg bg-saffron-50 border border-saffron-200 px-3 py-3 text-xs text-saffron-600 space-y-1.5">
-            <p className="font-bold">⚠️ Université créée mais email non envoyé</p>
-            <p>Erreur Resend : {emailWarning.error}</p>
-            {emailWarning.password && (
-              <p>Mot de passe temporaire : <span className="font-mono font-bold bg-white px-2 py-0.5 rounded border border-saffron-200 select-all">{emailWarning.password}</span></p>
-            )}
-            <p className="text-saffron-500">Transmets ces identifiants manuellement à l'école.</p>
-          </div>
-        )}
-
         {/* Actions */}
         {isPending && (
           <div className="flex gap-2">
@@ -217,11 +323,9 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
               disabled={busy !== null}
               className="flex flex-[2] items-center justify-center gap-1.5 rounded-xl bg-brand-600 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-500 disabled:opacity-60"
             >
-              {busy === "approve" ? (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              ) : (
-                <CheckCircle2 className="h-3.5 w-3.5" />
-              )}
+              {busy === "approve"
+                ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                : <CheckCircle2 className="h-3.5 w-3.5" />}
               {busy === "approve" ? "Traitement…" : "Approuver l'école"}
             </button>
           </div>
@@ -233,6 +337,13 @@ function RequestCard({ request, onActionDone }: { request: SchoolRequest; onActi
           request={request}
           onClose={() => setShowRejectModal(false)}
           onConfirm={(reason) => handleAction("reject", reason)}
+        />
+      )}
+
+      {credentials && (
+        <CredentialsCard
+          creds={credentials}
+          onClose={() => setCredentials(null)}
         />
       )}
     </>
@@ -248,14 +359,11 @@ export function SchoolRequestsSection({ initialRequests }: { initialRequests: Sc
   const displayed = filter === "pending" ? pending : requests;
 
   function handleActionDone(id: string, newStatus: "approved" | "rejected") {
-    setRequests((prev) =>
-      prev.map((r) => r.id === id ? { ...r, status: newStatus } : r)
-    );
+    setRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: newStatus } : r));
   }
 
   return (
     <section className="mb-8">
-      {/* En-tête section */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-saffron-500" />
@@ -267,7 +375,6 @@ export function SchoolRequestsSection({ initialRequests }: { initialRequests: Sc
           )}
         </div>
         <div className="flex items-center gap-2">
-          {/* Filtre */}
           <div className="flex rounded-xl border border-line bg-white p-1">
             {(["pending", "all"] as const).map((f) => (
               <button
@@ -282,7 +389,6 @@ export function SchoolRequestsSection({ initialRequests }: { initialRequests: Sc
               </button>
             ))}
           </div>
-          {/* Collapse */}
           <button
             onClick={() => setCollapsed((v) => !v)}
             className="flex h-8 w-8 items-center justify-center rounded-xl border border-line bg-white text-muted hover:text-ink"
@@ -297,9 +403,7 @@ export function SchoolRequestsSection({ initialRequests }: { initialRequests: Sc
           <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-white py-10 text-center">
             <BadgeCheck className="h-8 w-8 text-brand-200" />
             <p className="text-sm font-semibold text-muted">
-              {requests.length === 0
-                ? "Aucune demande reçue pour l'instant"
-                : "Aucune demande en attente"}
+              {requests.length === 0 ? "Aucune demande reçue pour l'instant" : "Aucune demande en attente"}
             </p>
             {requests.length === 0 && (
               <p className="text-xs text-muted max-w-xs">
