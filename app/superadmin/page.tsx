@@ -66,11 +66,15 @@ export default async function SuperAdminPage() {
     const supabaseAdmin = createSupabaseAdminClient();
 
     // Charger les demandes d'inscription
-    const { data: reqData } = await supabaseAdmin
+    const { data: reqData, error: reqError } = await supabaseAdmin
       .from("school_registration_requests")
       .select("id,university_name,email_domain,contact_name,contact_email,phone,students_count,status,created_at,reject_reason")
       .order("created_at", { ascending: false })
       .limit(50);
+
+    if (reqError) {
+      console.error("school_registration_requests query error:", reqError.message);
+    }
 
     schoolRequests = (reqData ?? []).map((r: any) => ({
       id: r.id,

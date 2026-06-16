@@ -236,8 +236,6 @@ export function SchoolRequestsSection({ initialRequests }: { initialRequests: Sc
     );
   }
 
-  if (requests.length === 0) return null;
-
   return (
     <section className="mb-8">
       {/* En-tête section */}
@@ -281,7 +279,16 @@ export function SchoolRequestsSection({ initialRequests }: { initialRequests: Sc
         displayed.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-white py-10 text-center">
             <BadgeCheck className="h-8 w-8 text-brand-200" />
-            <p className="text-sm font-semibold text-muted">Aucune demande en attente</p>
+            <p className="text-sm font-semibold text-muted">
+              {requests.length === 0
+                ? "Aucune demande reçue pour l'instant"
+                : "Aucune demande en attente"}
+            </p>
+            {requests.length === 0 && (
+              <p className="text-xs text-muted max-w-xs">
+                Quand une école remplit le formulaire d'inscription sur la page d'accueil, la demande apparaîtra ici.
+              </p>
+            )}
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
