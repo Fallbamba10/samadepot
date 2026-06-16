@@ -13,6 +13,7 @@ import {
   Upload,
   Users
 } from "lucide-react";
+import { RegistrationForm } from "./registration-form";
 
 export default function LandingPage() {
   return (
@@ -130,52 +131,7 @@ export default function LandingPage() {
             <h2 className="text-2xl font-extrabold text-white md:text-3xl">Inscrire mon université</h2>
             <p className="mt-2 text-slate-400">Gratuit pendant 3 mois. Aucune carte bancaire requise.</p>
           </div>
-          <div className="rounded-2xl bg-white p-6 shadow-xl">
-            <form action="/api/school-registration" method="POST" className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">Nom de l'université *</label>
-                  <input name="universityName" required placeholder="UCAD, ESP, ISM…" className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">Domaine email *</label>
-                  <input name="emailDomain" required placeholder="ucad.edu.sn" className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">Votre nom *</label>
-                  <input name="contactName" required placeholder="Prénom Nom" className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">Email de contact *</label>
-                  <input name="contactEmail" type="email" required placeholder="vous@universite.sn" className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-700">Téléphone WhatsApp</label>
-                <input name="phone" placeholder="+221 77 000 00 00" className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-700">Nombre d'étudiants estimé</label>
-                <select name="studentsCount" className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm focus:border-brand-500 focus:outline-none">
-                  <option value="">Sélectionner…</option>
-                  <option value="lt500">Moins de 500</option>
-                  <option value="500-2000">500 – 2 000</option>
-                  <option value="2000-5000">2 000 – 5 000</option>
-                  <option value="gt5000">Plus de 5 000</option>
-                </select>
-              </div>
-              <button
-                type="submit"
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-500"
-              >
-                Soumettre la demande
-                <ArrowRight className="h-4 w-4" />
-              </button>
-              <p className="text-center text-xs text-slate-400">Tu seras contacté sous 24h pour finaliser l'inscription.</p>
-            </form>
-          </div>
+          <RegistrationForm />
         </div>
       </section>
 
