@@ -14,6 +14,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { createSupabaseAdminClient, hasSupabaseAdminConfig } from "@/lib/supabase-admin";
 import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { SchoolRequestsSection } from "./school-requests-section";
 
 type UniversityRow = {
   id: string;
@@ -47,8 +48,42 @@ export default async function SuperAdminPage() {
   let universities: UniversityRow[] = [];
   let globalStats = { totalUniversities: 0, totalUsers: 0, totalSubmissions: 0, totalStorageMb: 0 };
 
+  type SchoolRequest = {
+    id: string;
+    universityName: string;
+    emailDomain: string;
+    contactName: string;
+    contactEmail: string;
+    phone: string | null;
+    studentsCount: string | null;
+    status: "pending" | "approved" | "rejected";
+    createdAt: string;
+    rejectReason?: string | null;
+  };
+  let schoolRequests: SchoolRequest[] = [];
+
   if (hasSupabaseAdminConfig()) {
     const supabaseAdmin = createSupabaseAdminClient();
+
+    // Charger les demandes d'inscription
+    const { data: reqData } = await supabaseAdmin
+      .from("school_registration_requests")
+      .select("id,university_name,email_domain,contact_name,contact_email,phone,students_count,status,created_at,reject_reason")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    schoolRequests = (reqData ?? []).map((r: any) => ({
+      id: r.id,
+      universityName: r.university_name,
+      emailDomain: r.email_domain,
+      contactName: r.contact_name,
+      contactEmail: r.contact_email,
+      phone: r.phone ?? null,
+      studentsCount: r.students_count ?? null,
+      status: r.status as "pending" | "approved" | "rejected",
+      createdAt: new Date(r.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }),
+      rejectReason: r.reject_reason ?? null
+    }));
 
     const { data: unis } = await supabaseAdmin
       .from("universities")
@@ -137,6 +172,9 @@ export default async function SuperAdminPage() {
           color="slate"
         />
       </div>
+
+      {/* Demandes d'inscription */}
+      <SchoolRequestsSection initialRequests={schoolRequests} />
 
       {/* Liste des universités */}
       <section>
