@@ -26,8 +26,16 @@ export async function POST(request: Request) {
     }
   });
 
-  if (error || !data?.properties?.action_link) {
-    return NextResponse.json({ error: "Aucun compte trouvé pour cet email" }, { status: 400 });
+  if (error) {
+    // Si l'email n'existe pas on répond succès quand même (sécurité)
+    if (error.message?.toLowerCase().includes("not found") || error.message?.toLowerCase().includes("user")) {
+      return NextResponse.json({ data: { message: "Email envoyé" } });
+    }
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  if (!data?.properties?.action_link) {
+    return NextResponse.json({ error: "Lien de réinitialisation non généré" }, { status: 400 });
   }
 
   const resetLink = data.properties.action_link;
