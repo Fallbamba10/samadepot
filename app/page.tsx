@@ -26,6 +26,7 @@ export default function LandingPage() {
             <span className="text-base font-bold text-slate-900">SamaDepot</span>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/pricing" className="hidden text-sm font-semibold text-slate-500 hover:text-slate-900 sm:block">Tarifs</Link>
             <Link href="/login" className="text-sm font-semibold text-slate-500 hover:text-slate-900">Se connecter</Link>
             <Link href="#inscrire" className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-500">
               Inscrire mon école
@@ -124,6 +125,37 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Aperçu tarifs */}
+      <section className="bg-slate-50 py-16 md:py-20">
+        <div className="mx-auto max-w-6xl px-4 md:px-8">
+          <h2 className="mb-2 text-center text-2xl font-extrabold text-slate-900 md:text-3xl">Des tarifs adaptés au contexte local</h2>
+          <p className="mb-10 text-center text-slate-500">Payez en FCFA via Orange Money ou Wave. Commencez gratuitement.</p>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              { name: "Starter", price: "Gratuit", desc: "5 profs · 200 étudiants · 5 Go", highlight: false },
+              { name: "Basic", price: "15 000 FCFA/mois", desc: "30 profs · 1 000 étudiants · 20 Go", highlight: true, badge: "Populaire" },
+              { name: "Premium", price: "35 000 FCFA/mois", desc: "Illimité · 100 Go · Support prioritaire", highlight: false }
+            ].map(plan => (
+              <div key={plan.name} className={`relative rounded-2xl border p-5 text-center ${plan.highlight ? "border-brand-600 bg-white shadow-lg shadow-brand-600/10" : "border-slate-200 bg-white"}`}>
+                {plan.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="rounded-full bg-brand-600 px-3 py-0.5 text-xs font-bold text-white">{plan.badge}</span>
+                  </div>
+                )}
+                <p className="text-sm font-bold text-slate-400 uppercase tracking-wide">{plan.name}</p>
+                <p className="mt-1 text-xl font-extrabold text-slate-900">{plan.price}</p>
+                <p className="mt-1.5 text-sm text-slate-500">{plan.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <Link href="/pricing" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline">
+              Voir tous les détails <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Formulaire inscription */}
       <section id="inscrire" className="bg-slate-900 py-16 md:py-20">
         <div className="mx-auto max-w-xl px-4 md:px-8">
@@ -143,7 +175,10 @@ export default function LandingPage() {
             <span className="text-sm font-bold text-slate-700">SamaDepot</span>
           </div>
           <p className="text-xs text-slate-400">Plateforme de dépôt de travaux universitaires · Dakar, Sénégal</p>
-          <Link href="/verify" className="text-xs text-slate-400 hover:text-brand-600">Vérifier un récépissé</Link>
+          <div className="flex gap-4">
+            <Link href="/verify" className="text-xs text-slate-400 hover:text-brand-600">Vérifier un récépissé</Link>
+            <Link href="/pricing" className="text-xs text-slate-400 hover:text-brand-600">Tarifs</Link>
+          </div>
         </div>
       </footer>
     </div>
