@@ -15,7 +15,7 @@
   "crons": [
     {
       "path": "/api/cron/deadline-reminder",
-      "schedule": "0 * * * *"
+      "schedule": "0 8 * * *"
     }
   ],
   "headers": [
