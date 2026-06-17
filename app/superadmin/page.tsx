@@ -12,6 +12,7 @@ import { createSupabaseAdminClient, hasSupabaseAdminConfig } from "@/lib/supabas
 import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { SchoolRequestsSection } from "./school-requests-section";
+import { SystemHealth } from "./system-health";
 import { UniversitiesList } from "./universities-list";
 
 type UniversityRow = {
@@ -167,6 +168,50 @@ export default async function SuperAdminPage() {
           color="slate"
         />
       </div>
+
+      {/* Santé du système */}
+      <SystemHealth checks={[
+        {
+          label: "Supabase Admin",
+          ok: hasSupabaseAdminConfig(),
+          detail: hasSupabaseAdminConfig()
+            ? "SUPABASE_SERVICE_ROLE_KEY configurée"
+            : "SUPABASE_SERVICE_ROLE_KEY manquante",
+          fix: "Ajouter SUPABASE_SERVICE_ROLE_KEY dans Vercel → Environment Variables"
+        },
+        {
+          label: "Email (Resend API Key)",
+          ok: Boolean(process.env.RESEND_API_KEY),
+          detail: process.env.RESEND_API_KEY
+            ? "RESEND_API_KEY configurée"
+            : "RESEND_API_KEY manquante — aucun email ne part",
+          fix: "Ajouter RESEND_API_KEY depuis resend.com/api-keys"
+        },
+        {
+          label: "Email expéditeur (EMAIL_FROM)",
+          ok: Boolean(process.env.EMAIL_FROM),
+          detail: process.env.EMAIL_FROM
+            ? `Expéditeur : ${process.env.EMAIL_FROM}`
+            : "EMAIL_FROM manquant — emails envoyés depuis onboarding@resend.dev (domaine non vérifié)",
+          fix: "Ajouter EMAIL_FROM=noreply@samadepot.app après vérification domaine Resend"
+        },
+        {
+          label: "Cron secret (CRON_SECRET)",
+          ok: Boolean(process.env.CRON_SECRET),
+          detail: process.env.CRON_SECRET
+            ? "CRON_SECRET configuré — rappels deadline sécurisés"
+            : "CRON_SECRET manquant — route /api/cron/deadline-reminder accessible sans auth",
+          fix: "Générer avec `openssl rand -hex 32` et ajouter dans Vercel"
+        },
+        {
+          label: "URL du site (NEXT_PUBLIC_SITE_URL)",
+          ok: Boolean(process.env.NEXT_PUBLIC_SITE_URL),
+          detail: process.env.NEXT_PUBLIC_SITE_URL
+            ? `URL : ${process.env.NEXT_PUBLIC_SITE_URL}`
+            : "NEXT_PUBLIC_SITE_URL manquant — liens dans les emails pointent vers localhost",
+          fix: "Ajouter NEXT_PUBLIC_SITE_URL=https://samadepot.vercel.app dans Vercel"
+        }
+      ]} />
 
       {/* Demandes d'inscription */}
       <SchoolRequestsSection initialRequests={schoolRequests} />
