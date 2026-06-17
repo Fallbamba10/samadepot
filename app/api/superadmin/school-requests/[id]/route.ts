@@ -39,6 +39,20 @@ export async function PATCH(
   }
 
   if (req.status !== "pending") {
+    // Demande déjà approuvée → renvoyer les identifiants stockés si dispo
+    if (action === "approve" && req.status === "approved" && req.university_id) {
+      return NextResponse.json({
+        data: {
+          status: "approved",
+          universityId: req.university_id,
+          universityName: req.university_name,
+          adminEmail: req.contact_email,
+          tempPassword: req.admin_temp_password ?? "",
+          emailSent: false,
+          alreadyProcessed: true
+        }
+      });
+    }
     return NextResponse.json({ error: "Demande déjà traitée" }, { status: 409 });
   }
 
@@ -129,10 +143,15 @@ export async function PATCH(
     console.error("Users insert error:", userInsertError.message);
   }
 
-  // 5. Marquer la demande comme approuvée
+  // 5. Marquer la demande comme approuvée (stocker le mdp pour pouvoir le réafficher)
   await supabaseAdmin
     .from("school_registration_requests")
-    .update({ status: "approved", processed_at: new Date().toISOString(), university_id: university.id })
+    .update({
+      status: "approved",
+      processed_at: new Date().toISOString(),
+      university_id: university.id,
+      admin_temp_password: tempPassword
+    })
     .eq("id", id);
 
   // 6. Envoyer l'email de bienvenue avec les identifiants en clair
