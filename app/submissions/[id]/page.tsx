@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Download, ExternalLink, FileCheck2, Hash, ReceiptText, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Download, ExternalLink, FileCheck2, Hash, Printer, ReceiptText, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getSubmissionById } from "@/lib/data";
@@ -82,6 +82,14 @@ export default async function SubmissionReceiptPage({
               >
                 <Download className="h-4 w-4" />
                 Telecharger
+              </Link>
+              <Link
+                href={`/submissions/${submission.id}/print`}
+                target="_blank"
+                className="focus-ring inline-flex h-10 w-full items-center justify-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-semibold text-muted transition hover:text-ink"
+              >
+                <Printer className="h-4 w-4 text-brand-600" />
+                Imprimer / Enregistrer PDF
               </Link>
               <Link
                 href={`/verify?id=${submission.id}`}

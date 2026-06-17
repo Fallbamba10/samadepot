@@ -8,3 +8,4 @@ coverage
 .env.local.bak
 /tmp
 sd-screenshot.mjs
+.vercel

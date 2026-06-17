@@ -1,142 +1,163 @@
-import { Building2, Database, LayoutDashboard, Settings, ShieldCheck, UsersRound } from "lucide-react";
+import {
+  Activity,
+  Building2,
+  GraduationCap,
+  Settings,
+  Users
+} from "lucide-react";
 import { AppShell } from "@/components/app-shell";
-import { StatGrid } from "@/components/stat-grid";
 import { getCurrentUser } from "@/lib/auth";
 import {
   getAcademicOptions,
   getAdminDashboard,
   getAdminOverview,
   getAdminUsers,
-  getDashboardStats
 } from "@/lib/data";
 import { AcademicManagement } from "./academic-management";
 import { AdminDashboardSection } from "./admin-dashboard-section";
 import { CreateUserForm } from "./create-user-form";
+import { OnboardingBanner } from "./onboarding-banner";
 import { UserManagement } from "./user-management";
 import { ImportCsvButton } from "@/components/import-csv-button";
-import { cn } from "@/lib/utils";
+import { InviteClassButton } from "@/components/invite-class-button";
+import { InviteTeacherButton } from "@/components/invite-teacher-button";
 
 export default async function AdminPage() {
-  const [currentUser, stats, overview, users, academicOptions, dashboardData] = await Promise.all([
-    getCurrentUser(),
-    getDashboardStats(),
-    getAdminOverview(),
-    getAdminUsers(),
-    getAcademicOptions(),
-    getAdminDashboard()
-  ]);
-
-  const adminChecks = [
-    {
-      label: "Isolation university_id",
-      status: "RLS active",
-      icon: ShieldCheck
-    },
-    {
-      label: "Comptes actifs",
-      status: `${overview.totalUsers} utilisateurs`,
-      icon: UsersRound
-    },
-    {
-      label: "Stockage utilise",
-      status: `${overview.usedStorageMb} Mo sur ${overview.maxStorageGb} Go`,
-      icon: Database
-    },
-    {
-      label: "Universite",
-      status: overview.universityName,
-      icon: Building2
-    }
-  ];
-
-  const tabs = [
-    { id: "dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-    { id: "config",    label: "Configuration",   icon: Settings },
-  ] as const;
+  const [currentUser, overview, users, academicOptions, dashboardData] =
+    await Promise.all([
+      getCurrentUser(),
+      getAdminOverview(),
+      getAdminUsers(),
+      getAcademicOptions(),
+      getAdminDashboard(),
+    ]);
 
   return (
     <AppShell active="Admin">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-ink">
-          Administration — {overview.universityName}
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          {overview.totalStudents} étudiants · {overview.totalTeachers} professeurs · {overview.usedStorageMb} Mo utilisés
-        </p>
-      </div>
-
-      {/* KPIs */}
-      <StatGrid stats={stats} />
-
-      {/* Onglets dashboard / config */}
-      <div className="mt-8">
-        <div className="mb-6 flex gap-1 rounded-2xl border border-line bg-white p-1 w-fit">
-          {tabs.map(t => (
-            <a
-              key={t.id}
-              href={`#${t.id}`}
-              className={cn(
-                "flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition",
-                "text-muted hover:text-ink"
-              )}
-            >
-              <t.icon className="h-4 w-4" />
-              {t.label}
-            </a>
-          ))}
-        </div>
-
-        {/* Section tableau de bord opérationnel */}
-        <div id="dashboard">
-          <div className="mb-4 flex items-center gap-2">
-            <LayoutDashboard className="h-4 w-4 text-brand-600" />
-            <h2 className="text-base font-bold text-ink">Activité en cours</h2>
+      {/* En-tête */}
+      <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-brand-600">
+            <Building2 className="h-4 w-4" />
+            Administration
           </div>
-          <AdminDashboardSection data={dashboardData} />
-        </div>
-
-        {/* Section configuration */}
-        <div id="config" className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Settings className="h-4 w-4 text-brand-600" />
-            <h2 className="text-base font-bold text-ink">Configuration</h2>
-          </div>
-
-          {/* Infos système */}
-          <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            {adminChecks.map((item) => (
-              <div key={item.label} className="rounded-xl border border-line bg-white p-4">
-                <item.icon className="h-5 w-5 text-brand-600" />
-                <div className="mt-3 text-sm font-bold text-ink">{item.label}</div>
-                <div className="mt-1 text-xs text-muted">{item.status}</div>
-              </div>
-            ))}
-          </section>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="flex items-center gap-3 rounded-xl border border-line bg-brand-50 px-4 py-3">
-              <div>
-                <p className="text-xs font-bold text-brand-600">Option 1 — Lien d'invitation</p>
-                <p className="text-[11px] text-muted mt-0.5">Le prof partage un lien WhatsApp, les étudiants s'inscrivent eux-mêmes</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl border border-line bg-slate-50 px-4 py-3">
-              <div>
-                <p className="text-xs font-bold text-ink">Option 2 — Import CSV</p>
-                <p className="text-[11px] text-muted mt-0.5">L'admin importe une liste Excel, tous les comptes créés en 1 clic</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-6 xl:grid-cols-2">
-            <CreateUserForm universityId={currentUser?.universityId ?? ""} />
-            <ImportCsvButton defaultRole="student" />
-          </div>
-
-          <AcademicManagement options={academicOptions} />
-          <UserManagement users={users} />
+          <h1 className="mt-1 text-2xl font-bold text-ink">
+            {overview.universityName}
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            {overview.totalStudents} étudiant{overview.totalStudents > 1 ? "s" : ""} ·{" "}
+            {overview.totalTeachers} professeur{overview.totalTeachers > 1 ? "s" : ""} ·{" "}
+            {overview.usedStorageMb} Mo utilisés
+          </p>
         </div>
       </div>
+
+      {/* Onboarding — visible seulement si la plateforme est vierge */}
+      <OnboardingBanner
+        hasClasses={academicOptions.classes.length > 0}
+        hasUsers={overview.totalTeachers > 0 || overview.totalStudents > 0}
+        hasSpaces={overview.totalSpaces > 0}
+      />
+
+      {/* ─── SECTION 1 : MEMBRES ─────────────────────────────────────────────── */}
+      <section className="mb-10">
+        <SectionHeader icon={<Users className="h-4 w-4" />} title="Membres" />
+
+        {/* Actions d'invitation — toujours visibles en haut */}
+        <div className="mb-5 overflow-hidden rounded-2xl border border-line bg-white">
+          <div className="border-b border-line bg-slate-50 px-5 py-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-muted">
+              Ajouter des membres
+            </p>
+          </div>
+          <div className="p-5">
+            <p className="mb-4 text-sm text-muted">
+              Choisis comment ajouter des membres à ta plateforme. Le lien d&apos;invitation est
+              la méthode la plus rapide : partage-le sur WhatsApp, la personne crée son propre compte.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {/* Colonne 1 : Inviter un prof */}
+              <div className="rounded-xl border border-lagoon-100 bg-lagoon-50 p-4">
+                <div className="mb-1 text-xs font-bold text-lagoon-700">
+                  Professeur
+                </div>
+                <p className="mb-3 text-xs text-lagoon-600">
+                  Génère un lien d&apos;inscription, partage-le au prof. Il crée son compte lui-même.
+                </p>
+                <InviteTeacherButton />
+              </div>
+
+              {/* Colonne 2 : Inviter des étudiants */}
+              <div className="rounded-xl border border-brand-100 bg-brand-50 p-4">
+                <div className="mb-1 text-xs font-bold text-brand-700">
+                  Étudiants (par classe)
+                </div>
+                <p className="mb-3 text-xs text-brand-600">
+                  Génère un lien par classe. Les étudiants s&apos;inscrivent et sont automatiquement inscrits dans la bonne classe.
+                </p>
+                {academicOptions.classes.length > 0 ? (
+                  <InviteClassButton classes={academicOptions.classes} />
+                ) : (
+                  <p className="rounded-lg border border-brand-200 bg-white px-3 py-2 text-xs text-brand-500">
+                    Crée d&apos;abord une classe dans &quot;Structure académique&quot; ci-dessous.
+                  </p>
+                )}
+              </div>
+
+              {/* Colonne 3 : Création manuelle */}
+              <div className="rounded-xl border border-line bg-white p-4">
+                <div className="mb-1 text-xs font-bold text-ink">
+                  Création manuelle
+                </div>
+                <p className="mb-3 text-xs text-muted">
+                  Crée un compte directement (tu gères le mot de passe). Utile pour un admin ou un prof sans accès WhatsApp.
+                </p>
+                <CreateUserForm universityId={currentUser?.universityId ?? ""} />
+              </div>
+            </div>
+
+            {/* Import CSV — option secondaire */}
+            <div className="mt-4 rounded-xl border border-dashed border-line p-4">
+              <p className="mb-2 text-xs font-bold text-ink">Import CSV en masse</p>
+              <p className="mb-3 text-xs text-muted">
+                Importe un fichier Excel/CSV pour créer des dizaines de comptes en une fois. Format attendu : nom, email, rôle.
+              </p>
+              <ImportCsvButton defaultRole="student" />
+            </div>
+          </div>
+        </div>
+
+        {/* Liste des membres */}
+        <UserManagement users={users} />
+      </section>
+
+      {/* ─── SECTION 2 : STRUCTURE ACADÉMIQUE ───────────────────────────────── */}
+      <section className="mb-10">
+        <SectionHeader icon={<GraduationCap className="h-4 w-4" />} title="Structure académique" />
+        <AcademicManagement options={academicOptions} />
+      </section>
+
+      {/* ─── SECTION 3 : ACTIVITÉ EN COURS ──────────────────────────────────── */}
+      <section className="mb-10">
+        <SectionHeader icon={<Activity className="h-4 w-4" />} title="Activité en cours" />
+        <AdminDashboardSection data={dashboardData} />
+      </section>
     </AppShell>
+  );
+}
+
+function SectionHeader({
+  icon,
+  title,
+}: {
+  icon: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <div className="mb-4 flex items-center gap-2">
+      <span className="text-brand-600">{icon}</span>
+      <h2 className="text-base font-bold text-ink">{title}</h2>
+      <span className="flex-1 border-t border-line" />
+    </div>
   );
 }

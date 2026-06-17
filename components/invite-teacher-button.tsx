@@ -2,15 +2,13 @@
 
 import { useState } from "react";
 import { CheckCircle2, Copy, Link2, Loader2, MessageCircle, X } from "lucide-react";
-import type { AcademicClass } from "@/types";
 
-export function InviteClassButton({ classes }: { classes: AcademicClass[] }) {
+export function InviteTeacherButton() {
   const [open, setOpen] = useState(false);
-  const [classId, setClassId] = useState(classes[0]?.id ?? "");
   const [expiresInDays, setExpiresInDays] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ url: string; className: string } | null>(null);
+  const [result, setResult] = useState<{ url: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
   async function generate() {
@@ -19,7 +17,7 @@ export function InviteClassButton({ classes }: { classes: AcademicClass[] }) {
     const res = await fetch("/api/invitations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: "student", classId, expiresInDays }),
+      body: JSON.stringify({ role: "teacher", expiresInDays }),
     });
     const json = await res.json();
     setIsLoading(false);
@@ -36,7 +34,7 @@ export function InviteClassButton({ classes }: { classes: AcademicClass[] }) {
 
   function whatsapp() {
     if (!result) return;
-    const text = `📚 Rejoins SamaDepot pour déposer tes travaux en ligne !\n\nClasse : ${result.className}\nLien d'inscription : ${result.url}\n\nInscris-toi directement depuis ce lien.`;
+    const text = `👋 Voici ton lien pour créer ton compte professeur sur SamaDepot :\n\n${result.url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 
@@ -50,7 +48,7 @@ export function InviteClassButton({ classes }: { classes: AcademicClass[] }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-500"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-lagoon-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-lagoon-400"
       >
         <Link2 className="h-4 w-4" />
         Générer un lien d&apos;invitation
@@ -61,12 +59,9 @@ export function InviteClassButton({ classes }: { classes: AcademicClass[] }) {
   if (result) {
     return (
       <div className="space-y-2">
-        <div className="flex items-start gap-2 rounded-lg border border-brand-200 bg-white p-2.5">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold text-brand-600">{result.className}</p>
-            <p className="break-all font-mono text-[11px] text-ink">{result.url}</p>
-          </div>
+        <div className="flex items-start gap-2 rounded-lg border border-lagoon-200 bg-white p-2.5">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-lagoon-500" />
+          <p className="break-all font-mono text-[11px] text-ink">{result.url}</p>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <button onClick={copy} className="flex items-center justify-center gap-1.5 rounded-lg border border-line bg-white py-2 text-xs font-semibold text-ink hover:bg-slate-50">
@@ -79,7 +74,7 @@ export function InviteClassButton({ classes }: { classes: AcademicClass[] }) {
           </button>
         </div>
         <button onClick={reset} className="w-full text-center text-xs text-muted hover:text-ink hover:underline">
-          Nouveau lien
+          Fermer
         </button>
       </div>
     );
@@ -88,22 +83,11 @@ export function InviteClassButton({ classes }: { classes: AcademicClass[] }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-ink">Classe</span>
+        <span className="text-xs font-semibold text-ink">Valide pendant</span>
         <button onClick={reset} className="text-muted hover:text-ink">
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
-      <select
-        value={classId}
-        onChange={(e) => setClassId(e.target.value)}
-        className="h-9 w-full rounded-lg border border-line bg-white px-2 text-sm"
-      >
-        {classes.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name} — {c.level}
-          </option>
-        ))}
-      </select>
       <select
         value={expiresInDays}
         onChange={(e) => setExpiresInDays(Number(e.target.value))}
@@ -113,18 +97,14 @@ export function InviteClassButton({ classes }: { classes: AcademicClass[] }) {
         <option value={15}>15 jours</option>
         <option value={30}>30 jours</option>
         <option value={90}>3 mois</option>
-        <option value={365}>1 an</option>
       </select>
       {error && <p className="text-xs text-coral-500">{error}</p>}
       <button
         onClick={generate}
-        disabled={isLoading || !classId}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 py-2 text-sm font-semibold text-white disabled:opacity-60"
+        disabled={isLoading}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-lagoon-500 py-2 text-sm font-semibold text-white disabled:opacity-60"
       >
-        {isLoading
-          ? <Loader2 className="h-4 w-4 animate-spin" />
-          : <><Link2 className="h-3.5 w-3.5" />Générer</>
-        }
+        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Link2 className="h-3.5 w-3.5" />Générer</>}
       </button>
     </div>
   );

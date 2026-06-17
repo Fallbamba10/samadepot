@@ -15,18 +15,31 @@ export function ResetPasswordClient() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Supabase met le token dans le hash (#access_token=...&type=recovery)
-    const hash = window.location.hash;
-    if (hash.includes("type=recovery") || hash.includes("access_token")) {
-      const supabase = createSupabaseBrowserClient();
-      // exchangeCodeForSession gère le hash automatiquement via onAuthStateChange
-      supabase.auth.onAuthStateChange((event) => {
-        if (event === "PASSWORD_RECOVERY") {
-          setReady(true);
-        }
-      });
+    const supabase = createSupabaseBrowserClient();
+
+    // Supabase met les tokens dans le hash : #access_token=...&refresh_token=...&type=recovery
+    const hash = window.location.hash.slice(1);
+    const params = new URLSearchParams(hash);
+    const type = params.get("type");
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token") ?? "";
+
+    if (type === "recovery" && accessToken) {
+      // Établir la session directement depuis les tokens du hash
+      supabase.auth
+        .setSession({ access_token: accessToken, refresh_token: refreshToken })
+        .then(({ error: sessionError }) => {
+          if (sessionError) {
+            setError("Lien invalide ou expiré. Refais une demande.");
+          } else {
+            setReady(true);
+            // Nettoyer le hash de l'URL sans recharger la page
+            window.history.replaceState(null, "", window.location.pathname);
+          }
+        });
     } else {
-      setError("Lien invalide ou expiré. Refais une demande de réinitialisation.");
+      // Pas de tokens dans l'URL — lien invalide ou déjà utilisé
+      setError("Lien invalide ou expiré. Refais une demande de réinitialisation depuis la page de connexion.");
     }
   }, []);
 
@@ -86,7 +99,8 @@ export function ResetPasswordClient() {
                     placeholder="••••••••"
                     required
                     minLength={8}
-                    className="h-12 w-full rounded-xl border border-line pl-10 pr-3 text-sm transition placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                    disabled={!ready}
+                    className="h-12 w-full rounded-xl border border-line pl-10 pr-3 text-sm transition placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -100,7 +114,8 @@ export function ResetPasswordClient() {
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="h-12 w-full rounded-xl border border-line pl-10 pr-3 text-sm transition placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                    disabled={!ready}
+                    className="h-12 w-full rounded-xl border border-line pl-10 pr-3 text-sm transition placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:opacity-50"
                   />
                 </div>
               </div>

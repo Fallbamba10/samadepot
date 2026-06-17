@@ -14,7 +14,7 @@ export async function GET(
   const supabaseAdmin = createSupabaseAdminClient();
   const { data, error } = await supabaseAdmin
     .from("class_invitations")
-    .select("id,expires_at,max_uses,use_count,is_active,academic_classes(name,level,code),universities(name)")
+    .select("id,expires_at,max_uses,use_count,is_active,role,academic_classes(name,level,code),universities(name,email_domain)")
     .eq("token", token)
     .single();
 
@@ -23,26 +23,27 @@ export async function GET(
   }
 
   if (!data.is_active) {
-    return NextResponse.json({ error: "Invitation desactivee" }, { status: 410 });
+    return NextResponse.json({ error: "Invitation désactivée" }, { status: 410 });
   }
-
   if (data.expires_at && new Date(data.expires_at) < new Date()) {
-    return NextResponse.json({ error: "Invitation expiree" }, { status: 410 });
+    return NextResponse.json({ error: "Invitation expirée" }, { status: 410 });
   }
-
   if (data.max_uses && data.use_count >= data.max_uses) {
-    return NextResponse.json({ error: "Invitation epuisee" }, { status: 410 });
+    return NextResponse.json({ error: "Invitation épuisée (nombre max d'utilisations atteint)" }, { status: 410 });
   }
 
   const cls = Array.isArray(data.academic_classes) ? data.academic_classes[0] : data.academic_classes;
   const uni = Array.isArray(data.universities) ? data.universities[0] : data.universities;
+  const role = (data.role as string) ?? "student";
 
   return NextResponse.json({
     data: {
-      className: cls?.name ?? "Classe",
-      classCode: cls?.code ?? "",
-      classLevel: cls?.level ?? "",
-      universityName: uni?.name ?? "Universite",
+      role,
+      className: cls?.name ?? null,
+      classCode: cls?.code ?? null,
+      classLevel: cls?.level ?? null,
+      universityName: uni?.name ?? "Université",
+      emailDomain: uni?.email_domain ?? null,
       expiresAt: data.expires_at,
     }
   });
@@ -66,7 +67,10 @@ export async function POST(
   const phone = String(body.phone ?? "").trim() || undefined;
 
   if (!email || !fullName || password.length < 8) {
-    return NextResponse.json({ error: "Email, nom et mot de passe (8 car. min) requis" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Email, nom et mot de passe (8 car. min) requis" },
+      { status: 400 }
+    );
   }
 
   const supabaseAdmin = createSupabaseAdminClient();
@@ -74,7 +78,7 @@ export async function POST(
   // Vérifie l'invitation
   const { data: invitation, error: invError } = await supabaseAdmin
     .from("class_invitations")
-    .select("id,class_id,university_id,expires_at,max_uses,use_count,is_active")
+    .select("id,class_id,university_id,expires_at,max_uses,use_count,is_active,role,universities(email_domain)")
     .eq("token", token)
     .single();
 
@@ -83,28 +87,43 @@ export async function POST(
   }
 
   if (!invitation.is_active) {
-    return NextResponse.json({ error: "Invitation desactivee" }, { status: 410 });
+    return NextResponse.json({ error: "Invitation désactivée" }, { status: 410 });
   }
   if (invitation.expires_at && new Date(invitation.expires_at) < new Date()) {
-    return NextResponse.json({ error: "Invitation expiree" }, { status: 410 });
+    return NextResponse.json({ error: "Invitation expirée" }, { status: 410 });
   }
   if (invitation.max_uses && invitation.use_count >= invitation.max_uses) {
-    return NextResponse.json({ error: "Invitation epuisee" }, { status: 410 });
+    return NextResponse.json({ error: "Invitation épuisée" }, { status: 410 });
   }
+
+  // Validation du domaine email si l'université en a un configuré
+  const uni = Array.isArray(invitation.universities) ? invitation.universities[0] : invitation.universities;
+  const emailDomain = (uni as any)?.email_domain as string | null | undefined;
+  if (emailDomain) {
+    const suffix = emailDomain.startsWith("@") ? emailDomain : `@${emailDomain}`;
+    if (!email.endsWith(suffix)) {
+      return NextResponse.json(
+        { error: `L'email doit se terminer par ${suffix}` },
+        { status: 400 }
+      );
+    }
+  }
+
+  const role = (invitation.role as string) ?? "student";
 
   // Crée le compte Supabase Auth
   const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName, role: "student" }
+    user_metadata: { full_name: fullName, role }
   });
 
   if (authError || !authData.user) {
     const msg = authError?.message ?? "Creation impossible";
-    const alreadyExists = msg.toLowerCase().includes("already") || msg.includes("already registered");
+    const alreadyExists = msg.toLowerCase().includes("already");
     return NextResponse.json(
-      { error: alreadyExists ? "Cet email est deja inscrit" : msg },
+      { error: alreadyExists ? "Cet email est déjà inscrit. Connecte-toi directement." : msg },
       { status: 400 }
     );
   }
@@ -115,9 +134,9 @@ export async function POST(
     university_id: invitation.university_id,
     email,
     full_name: fullName,
-    role: "student",
+    role,
     phone,
-    student_number: studentNumber
+    student_number: role === "student" ? studentNumber : undefined
   });
 
   if (profileError) {
@@ -125,12 +144,14 @@ export async function POST(
     return NextResponse.json({ error: profileError.message }, { status: 400 });
   }
 
-  // Inscrit l'étudiant dans la classe
-  await supabaseAdmin.from("class_students").insert({
-    university_id: invitation.university_id,
-    class_id: invitation.class_id,
-    student_id: authData.user.id
-  });
+  // Inscrit l'étudiant dans la classe (seulement pour les étudiants)
+  if (role === "student" && invitation.class_id) {
+    await supabaseAdmin.from("class_students").insert({
+      university_id: invitation.university_id,
+      class_id: invitation.class_id,
+      student_id: authData.user.id
+    });
+  }
 
   // Incrémente use_count
   await supabaseAdmin
@@ -138,5 +159,8 @@ export async function POST(
     .update({ use_count: invitation.use_count + 1 })
     .eq("id", invitation.id);
 
-  return NextResponse.json({ data: { email, message: "Compte cree avec succes" } }, { status: 201 });
+  return NextResponse.json(
+    { data: { email, role, message: "Compte créé avec succès" } },
+    { status: 201 }
+  );
 }
