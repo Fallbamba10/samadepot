@@ -28,7 +28,7 @@ export function LoginForm({ isConfigured }: { isConfigured: boolean }) {
 
     setIsLoading(true);
     const supabase = createSupabaseBrowserClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password
     });
@@ -36,6 +36,13 @@ export function LoginForm({ isConfigured }: { isConfigured: boolean }) {
 
     if (signInError) {
       setError("Email ou mot de passe incorrect.");
+      return;
+    }
+
+    // Forcer le changement de mot de passe si c'est la première connexion
+    if (signInData.user?.user_metadata?.must_change_password) {
+      router.push("/profile?force=1");
+      router.refresh();
       return;
     }
 

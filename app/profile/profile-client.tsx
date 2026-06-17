@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, CheckCircle2, Lock, Mail, Phone, Save, User } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { AlertCircle, CheckCircle2, Lock, Mail, Phone, Save, ShieldAlert, User } from "lucide-react";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
 import type { AppUser } from "@/lib/auth";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -12,6 +14,10 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export function ProfileClient({ user }: { user: AppUser }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isForced = searchParams.get("force") === "1";
+
   const [fullName, setFullName] = useState(user.fullName);
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
@@ -55,12 +61,32 @@ export function ProfileClient({ user }: { user: AppUser }) {
     const json = await res.json();
     setSavingPwd(false);
     if (!res.ok) { setPwdError(json.error ?? "Erreur"); return; }
+
+    // Effacer le flag must_change_password dans les metadata Supabase
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.updateUser({ data: { must_change_password: false } });
+
     setSavedPwd(true);
     setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
-    setTimeout(() => setSavedPwd(false), 3000);
+
+    if (isForced) {
+      setTimeout(() => router.push("/dashboard"), 1500);
+    } else {
+      setTimeout(() => setSavedPwd(false), 3000);
+    }
   }
 
   return (
+    <div className="space-y-6">
+      {isForced && (
+        <div className="flex items-start gap-3 rounded-2xl border border-saffron-200 bg-saffron-50 px-5 py-4">
+          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-saffron-500" />
+          <div>
+            <p className="text-sm font-bold text-saffron-600">Première connexion — changez votre mot de passe</p>
+            <p className="mt-0.5 text-xs text-saffron-500">Pour la sécurité de votre compte, vous devez choisir un nouveau mot de passe avant de continuer.</p>
+          </div>
+        </div>
+      )}
     <div className="grid gap-6 xl:grid-cols-2">
       {/* Infos générales */}
       <section className="rounded-2xl border border-line bg-white p-6 shadow-line">
@@ -194,6 +220,7 @@ export function ProfileClient({ user }: { user: AppUser }) {
           </button>
         </form>
       </section>
+    </div>
     </div>
   );
 }

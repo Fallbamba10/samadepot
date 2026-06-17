@@ -119,7 +119,7 @@ export async function PATCH(
     email: req.contact_email,
     password: tempPassword,
     email_confirm: true,
-    user_metadata: { full_name: req.contact_name, role: "admin", university_id: university.id }
+    user_metadata: { full_name: req.contact_name, role: "admin", university_id: university.id, must_change_password: true }
   });
 
   if (authError || !authUser.user) {
@@ -216,25 +216,23 @@ export async function PATCH(
 
     if (emailError) {
       console.error("Resend welcome email error:", JSON.stringify(emailError));
-      // On retourne quand même succès (université créée) mais avec le détail de l'erreur email
-      return NextResponse.json({
-        data: {
-          status: "approved",
-          universityId: university.id,
-          universityName: university.name,
-          adminEmail: req.contact_email,
-          emailError: emailError.message,
-          tempPassword // exposé pour que le superadmin puisse le copier si email échoue
-        }
-      });
+    } else {
+      console.log("Welcome email sent:", emailData?.id, "to:", req.contact_email);
     }
 
-    console.log("Welcome email sent:", emailData?.id, "to:", req.contact_email);
-  } else {
-    console.error("RESEND_API_KEY manquant — email de bienvenue non envoyé");
+    return NextResponse.json({
+      data: {
+        status: "approved",
+        universityId: university.id,
+        universityName: university.name,
+        adminEmail: req.contact_email,
+        tempPassword,
+        emailSent: !emailError
+      }
+    });
   }
 
-  // Toujours retourner tempPassword pour que la modal s'affiche
+  // Pas de RESEND_API_KEY
   return NextResponse.json({
     data: {
       status: "approved",
@@ -242,7 +240,7 @@ export async function PATCH(
       universityName: university.name,
       adminEmail: req.contact_email,
       tempPassword,
-      emailSent: Boolean(process.env.RESEND_API_KEY)
+      emailSent: false
     }
   });
 }
