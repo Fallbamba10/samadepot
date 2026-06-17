@@ -229,7 +229,7 @@ function RequestCard({ request, onActionDone }: {
             email: json.data?.adminEmail ?? request.contactEmail,
             password: json.data?.tempPassword ?? "",
             universityName: request.universityName,
-            emailSent: !json.data?.emailError
+            emailSent: Boolean(json.data?.emailSent) && !json.data?.emailError
           });
         }
         onActionDone(request.id, action === "approve" ? "approved" : "rejected");

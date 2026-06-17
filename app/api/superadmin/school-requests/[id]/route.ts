@@ -213,24 +213,17 @@ export async function PATCH(
     console.log("Welcome email sent:", emailData?.id, "to:", req.contact_email);
   } else {
     console.error("RESEND_API_KEY manquant — email de bienvenue non envoyé");
-    return NextResponse.json({
-      data: {
-        status: "approved",
-        universityId: university.id,
-        universityName: university.name,
-        adminEmail: req.contact_email,
-        emailError: "RESEND_API_KEY non configuré",
-        tempPassword
-      }
-    });
   }
 
+  // Toujours retourner tempPassword pour que la modal s'affiche
   return NextResponse.json({
     data: {
       status: "approved",
       universityId: university.id,
       universityName: university.name,
-      adminEmail: req.contact_email
+      adminEmail: req.contact_email,
+      tempPassword,
+      emailSent: Boolean(process.env.RESEND_API_KEY)
     }
   });
 }
