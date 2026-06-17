@@ -9,6 +9,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { spaces, stats, submissions, spaceTracking, mockClasses, mockSubjects, mockNotifications } from "@/lib/mock-data";
 import type {
   AcademicOptions,
+  AdminDashboard,
   AdminOverview,
   AdminUser,
   Notification,
@@ -653,6 +654,121 @@ export async function getSpaceTracking(spaceId: string): Promise<SpaceTracking |
       };
     })
   };
+}
+
+export async function getAdminDashboard(): Promise<AdminDashboard> {
+  const empty: AdminDashboard = { activeSpaces: [], classStats: [], teachersWithoutSpace: [], recentSubmissions: [] };
+
+  if (!hasSupabaseConfig() || !hasSupabaseAdminConfig()) return empty;
+
+  const currentUser = await getCurrentUser();
+  if (!currentUser || !["admin", "superadmin"].includes(currentUser.role)) return empty;
+
+  const supabaseAdmin = createSupabaseAdminClient();
+  const universityId = currentUser.universityId;
+
+  // Espaces actifs + profs + classes liées
+  const { data: spacesData } = await supabaseAdmin
+    .from("submission_spaces")
+    .select("id,title,type,deadline,teacher_id,is_active")
+    .eq("university_id", universityId)
+    .eq("is_active", true)
+    .order("deadline", { ascending: true })
+    .limit(20);
+
+  const spaceIds = (spacesData ?? []).map((s: any) => s.id);
+  const teacherIds = [...new Set((spacesData ?? []).map((s: any) => s.teacher_id))];
+
+  const [teachersRes, classLinksRes, submissionsRes, allTeachersRes, classesRes, classStudentsRes] = await Promise.all([
+    teacherIds.length > 0
+      ? supabaseAdmin.from("users").select("id,full_name").in("id", teacherIds)
+      : Promise.resolve({ data: [] }),
+    spaceIds.length > 0
+      ? supabaseAdmin.from("submission_space_classes").select("space_id,academic_classes(id,name,code)").in("space_id", spaceIds)
+      : Promise.resolve({ data: [] }),
+    spaceIds.length > 0
+      ? supabaseAdmin.from("submissions").select("space_id,id,student_id,submitted_at,is_late,users(full_name),submission_spaces(title)").in("space_id", spaceIds).order("submitted_at", { ascending: false }).limit(20)
+      : Promise.resolve({ data: [] }),
+    supabaseAdmin.from("users").select("id,full_name,email").eq("university_id", universityId).eq("role", "teacher").eq("is_active", true),
+    supabaseAdmin.from("academic_classes").select("id,name,code,level").eq("university_id", universityId).eq("is_active", true),
+    supabaseAdmin.from("class_students").select("class_id,student_id")
+      .in("class_id", (await supabaseAdmin.from("academic_classes").select("id").eq("university_id", universityId).eq("is_active", true)).data?.map((c: any) => c.id) ?? [])
+  ]);
+
+  const teacherNames = new Map((teachersRes.data ?? []).map((t: any) => [t.id, t.full_name]));
+
+  // Classes par espace
+  const classNamesBySpace = new Map<string, string[]>();
+  for (const link of classLinksRes.data ?? []) {
+    const cls = Array.isArray(link.academic_classes) ? link.academic_classes[0] : link.academic_classes;
+    if (!cls) continue;
+    const existing = classNamesBySpace.get(link.space_id) ?? [];
+    classNamesBySpace.set(link.space_id, [...existing, cls.name ?? cls.code]);
+  }
+
+  // Nombre de dépôts par espace
+  const subCountBySpace = new Map<string, number>();
+  for (const s of submissionsRes.data ?? []) {
+    subCountBySpace.set(s.space_id, (subCountBySpace.get(s.space_id) ?? 0) + 1);
+  }
+
+  const activeSpaces = (spacesData ?? []).map((s: any) => ({
+    id: s.id,
+    title: s.title,
+    type: s.type,
+    teacherName: teacherNames.get(s.teacher_id) ?? "Professeur",
+    classes: classNamesBySpace.get(s.id) ?? [],
+    deadline: formatDate(s.deadline) ?? "",
+    status: getDeadlineStatus(s.deadline) as import("@/types").SpaceStatus,
+    totalSubmitted: subCountBySpace.get(s.id) ?? 0,
+    totalExpected: 0
+  }));
+
+  // Profs sans espace actif
+  const teachersWithSpace = new Set((spacesData ?? []).map((s: any) => s.teacher_id));
+  const teachersWithoutSpace = (allTeachersRes.data ?? [])
+    .filter((t: any) => !teachersWithSpace.has(t.id))
+    .map((t: any) => ({ id: t.id, fullName: t.full_name, email: t.email }));
+
+  // Stats par classe
+  const studentsByClass = new Map<string, Set<string>>();
+  for (const cs of classStudentsRes.data ?? []) {
+    if (!studentsByClass.has(cs.class_id)) studentsByClass.set(cs.class_id, new Set());
+    studentsByClass.get(cs.class_id)!.add(cs.student_id);
+  }
+
+  // Dépôts par étudiant (toutes classes, tous espaces)
+  const submittedStudents = new Set((submissionsRes.data ?? []).map((s: any) => s.student_id));
+
+  const classStats = (classesRes.data ?? []).map((c: any) => {
+    const students = studentsByClass.get(c.id) ?? new Set();
+    const submitted = [...students].filter(sid => submittedStudents.has(sid)).length;
+    const total = students.size;
+    return {
+      id: c.id,
+      name: c.name,
+      code: c.code,
+      level: c.level,
+      totalStudents: total,
+      totalSubmissions: submitted,
+      participationPct: total > 0 ? Math.round((submitted / total) * 100) : 0
+    };
+  }).sort((a, b) => b.totalStudents - a.totalStudents);
+
+  // Dépôts récents
+  const recentSubmissions = (submissionsRes.data ?? []).slice(0, 8).map((s: any) => {
+    const user = Array.isArray(s.users) ? s.users[0] : s.users;
+    const space = Array.isArray(s.submission_spaces) ? s.submission_spaces[0] : s.submission_spaces;
+    return {
+      id: s.id,
+      studentName: user?.full_name ?? "Étudiant",
+      spaceTitle: space?.title ?? "Espace",
+      submittedAt: formatDate(s.submitted_at) ?? "",
+      isLate: Boolean(s.is_late)
+    };
+  });
+
+  return { activeSpaces, classStats, teachersWithoutSpace, recentSubmissions };
 }
 
 export async function getNotifications(): Promise<Notification[]> {

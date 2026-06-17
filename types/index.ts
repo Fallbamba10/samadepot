@@ -151,6 +151,35 @@ export type SpaceStudent = {
   };
 };
 
+export type AdminSpaceRow = {
+  id: string;
+  title: string;
+  type: string;
+  teacherName: string;
+  classes: string[];
+  deadline: string;
+  status: SpaceStatus;
+  totalSubmitted: number;
+  totalExpected: number;
+};
+
+export type AdminClassRow = {
+  id: string;
+  name: string;
+  code: string;
+  level: string;
+  totalStudents: number;
+  totalSubmissions: number;
+  participationPct: number;
+};
+
+export type AdminDashboard = {
+  activeSpaces: AdminSpaceRow[];
+  classStats: AdminClassRow[];
+  teachersWithoutSpace: { id: string; fullName: string; email: string }[];
+  recentSubmissions: { id: string; studentName: string; spaceTitle: string; submittedAt: string; isLate: boolean }[];
+};
+
 export type SpaceTracking = {
   spaceId: string;
   spaceTitle: string;
