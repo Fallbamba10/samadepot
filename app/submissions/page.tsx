@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+
+export const dynamic = "force-dynamic";
 import { AppShell } from "@/components/app-shell";
 import { getSubmissions } from "@/lib/data";
 import { SubmissionsClient } from "./submissions-client";
