@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BookOpenCheck,
   CheckCircle2,
+  Clock,
   FileCheck2,
   GraduationCap,
   Hash,
@@ -72,8 +73,142 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Aperçu du produit */}
+      <section className="overflow-hidden bg-slate-50 py-16 md:py-24">
+        <div className="mx-auto max-w-6xl px-4 md:px-8">
+          <div className="mb-12 text-center">
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-600">Le produit</p>
+            <h2 className="text-2xl font-extrabold text-slate-900 md:text-3xl">Voici à quoi ça ressemble</h2>
+            <p className="mt-3 text-slate-500">Simple pour les étudiants, puissant pour les enseignants.</p>
+          </div>
+
+          {/* Tab 1 — Vue prof : suivi de classe */}
+          <div className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
+            {/* Barre navigateur factice */}
+            <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
+              <div className="flex gap-1.5"><div className="h-3 w-3 rounded-full bg-red-400"/><div className="h-3 w-3 rounded-full bg-yellow-400"/><div className="h-3 w-3 rounded-full bg-green-400"/></div>
+              <div className="mx-auto rounded-md bg-white border border-slate-200 px-4 py-1 text-xs text-slate-400 font-mono">samadepot.vercel.app/teacher/spaces/…</div>
+            </div>
+            {/* Contenu maquette */}
+            <div className="p-5">
+              <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-brand-600">TP — Développement Web · L2 Info</p>
+                  <h3 className="mt-1 text-lg font-bold text-slate-900">TP React & Next.js</h3>
+                  <p className="text-xs text-slate-400">Deadline : 30 juin 2026, 23:59</p>
+                </div>
+                <div className="flex gap-2">
+                  {[
+                    { label: "18 / 24", sub: "Rendus", color: "bg-brand-50 text-brand-700" },
+                    { label: "3", sub: "À évaluer", color: "bg-saffron-50 text-saffron-700" },
+                    { label: "6", sub: "Manquants", color: "bg-coral-50 text-coral-700" },
+                  ].map(s => (
+                    <div key={s.sub} className={`rounded-xl px-4 py-2 text-center ${s.color}`}>
+                      <p className="text-lg font-extrabold">{s.label}</p>
+                      <p className="text-[10px] font-semibold">{s.sub}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Barre progression */}
+              <div className="mb-4 h-2.5 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-brand-600" style={{ width: "75%" }} />
+              </div>
+              {/* Liste étudiants */}
+              <div className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+                {[
+                  { name: "Aminata Fall", num: "2023-INFO-041", file: "tp_react_aminata.zip", time: "28 juin, 14:32", status: "Validé", statusColor: "text-brand-600 bg-brand-50" },
+                  { name: "Moussa Sarr", num: "2023-INFO-022", file: "projet_final_moussa.zip", time: "29 juin, 09:15", status: "À évaluer", statusColor: "text-saffron-600 bg-saffron-50" },
+                  { name: "Khadija Diallo", num: "2023-INFO-078", file: "—", time: "—", status: "Pas rendu", statusColor: "text-slate-400 bg-slate-50" },
+                ].map((row, i) => (
+                  <div key={i} className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">{row.name[0]}</div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-900">{row.name} <span className="ml-1 text-xs font-normal text-slate-400">{row.num}</span></p>
+                      <p className="truncate text-xs text-slate-400">{row.file} {row.time !== "—" && `· ${row.time}`}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${row.statusColor}`}>{row.status}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 2 colonnes : récépissé + formulaire dépôt */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Récépissé étudiant */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-900/5">
+              <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
+                <div className="flex gap-1.5"><div className="h-3 w-3 rounded-full bg-red-400"/><div className="h-3 w-3 rounded-full bg-yellow-400"/><div className="h-3 w-3 rounded-full bg-green-400"/></div>
+                <div className="mx-auto rounded-md bg-white border border-slate-200 px-3 py-1 text-xs text-slate-400 font-mono">…/submissions/SD-2026-00421</div>
+              </div>
+              <div className="p-5">
+                <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-600">
+                  <FileCheck2 className="h-3.5 w-3.5" /> Récépissé numérique
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Dépôt SD-2026-00421</h3>
+                <p className="mt-1 text-xs text-slate-400">Preuve horodatée et signée cryptographiquement</p>
+                <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                  {[
+                    { l: "Étudiant", v: "Aminata Fall" },
+                    { l: "Espace", v: "TP React" },
+                    { l: "Date dépôt", v: "28 juin, 14:32" },
+                    { l: "Statut", v: "Validé" },
+                  ].map(r => (
+                    <div key={r.l} className="rounded-lg border border-slate-100 p-2.5">
+                      <p className="font-semibold uppercase tracking-wide text-slate-400" style={{ fontSize: "9px" }}>{r.l}</p>
+                      <p className="mt-0.5 font-semibold text-slate-800">{r.v}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-start gap-2 rounded-lg bg-slate-50 p-2.5">
+                  <Hash className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" />
+                  <p className="break-all font-mono text-[10px] text-slate-400">a83c91e4f0b9c8d92f1b7c3e5d4a8f06e1b2c9d3…</p>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[#25D366] py-2 text-xs font-bold text-white">
+                    <Share2 className="h-3.5 w-3.5" /> WhatsApp
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 py-2 text-xs font-semibold text-slate-600">
+                    <ShieldCheck className="h-3.5 w-3.5 text-brand-600" /> Vérifier
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Formulaire dépôt */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-900/5">
+              <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
+                <div className="flex gap-1.5"><div className="h-3 w-3 rounded-full bg-red-400"/><div className="h-3 w-3 rounded-full bg-yellow-400"/><div className="h-3 w-3 rounded-full bg-green-400"/></div>
+                <div className="mx-auto rounded-md bg-white border border-slate-200 px-3 py-1 text-xs text-slate-400 font-mono">…/spaces/tp-react/submit</div>
+              </div>
+              <div className="p-5">
+                <div className="mb-1 text-xs font-bold uppercase tracking-wide text-brand-600">TP · L2 Info</div>
+                <h3 className="text-base font-bold text-slate-900">TP React & Next.js</h3>
+                <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+                  <Clock className="h-3.5 w-3.5 text-red-400" />
+                  Deadline : 30 juin 2026, 23:59 · <span className="font-semibold text-red-500">1 jour restant</span>
+                </div>
+                <div className="mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-brand-200 bg-brand-50 py-8 text-center">
+                  <Upload className="h-8 w-8 text-brand-400" />
+                  <p className="text-sm font-semibold text-slate-700">Glisse ton fichier ici</p>
+                  <p className="text-xs text-slate-400">PDF, ZIP, DOCX · Max 50 Mo</p>
+                </div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-full w-[65%] rounded-full bg-brand-600 transition-all" />
+                </div>
+                <p className="mt-1 text-right text-[10px] text-slate-400">Envoi en cours… 65%</p>
+                <div className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white opacity-60">
+                  <Upload className="h-4 w-4" /> Confirmer le dépôt
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Comment ça marche */}
-      <section className="bg-slate-50 py-16 md:py-20">
+      <section className="bg-white py-16 md:py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <h2 className="mb-2 text-center text-2xl font-extrabold text-slate-900 md:text-3xl">Comment ça marche ?</h2>
           <p className="mb-12 text-center text-slate-500">En 3 étapes simples, sans formation requise.</p>
@@ -152,6 +287,25 @@ export default function LandingPage() {
             <Link href="/pricing" className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline">
               Voir tous les détails <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Bande de réassurance */}
+      <section className="border-y border-slate-100 py-10">
+        <div className="mx-auto max-w-5xl px-4 md:px-8">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+            {[
+              { value: "100%", label: "Web, aucune app à installer" },
+              { value: "SHA-256", label: "Chaque dépôt est signé" },
+              { value: "FCFA", label: "Paiement local Wave & Orange Money" },
+              { value: "< 2 min", label: "Pour créer un espace de dépôt" },
+            ].map(s => (
+              <div key={s.label} className="text-center">
+                <p className="text-2xl font-extrabold text-brand-600">{s.value}</p>
+                <p className="mt-1 text-xs text-slate-500">{s.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
