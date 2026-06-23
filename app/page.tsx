@@ -265,12 +265,11 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <h2 className="mb-2 text-center text-2xl font-extrabold text-slate-900 md:text-3xl">Des tarifs adaptés au contexte local</h2>
           <p className="mb-10 text-center text-slate-500">Payez en FCFA via Orange Money ou Wave. Commencez gratuitement.</p>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-3">
             {[
-              { name: "Essai", price: "Gratuit", desc: "2 profs · 30 étudiants · 1 Go", highlight: false },
-              { name: "Basic", price: "15 000 FCFA/mois", desc: "15 profs · 500 étudiants · 10 Go", highlight: true, badge: "Populaire" },
-              { name: "Standard", price: "25 000 FCFA/mois", desc: "40 profs · 1 500 étudiants · 30 Go", highlight: false },
-              { name: "Premium", price: "35 000 FCFA/mois", desc: "Illimité · 100 Go · Support prioritaire", highlight: false }
+              { name: "Gratuit", price: "Gratuit", desc: "10 profs · 200 étudiants · 3 Go", highlight: false },
+              { name: "Basic", price: "15 000 FCFA/mois", desc: "40 profs · 1 500 étudiants · 20 Go", highlight: true, badge: "Populaire" },
+              { name: "Premium", price: "35 000 FCFA/mois", desc: "Illimité · 50 Go · Support prioritaire", highlight: false }
             ].map(plan => (
               <div key={plan.name} className={`relative rounded-2xl border p-5 text-center ${plan.highlight ? "border-brand-600 bg-white shadow-lg shadow-brand-600/10" : "border-slate-200 bg-white"}`}>
                 {plan.badge && (

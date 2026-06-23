@@ -10,19 +10,19 @@ import {
 
 const PLANS = [
   {
-    id: "starter",
-    name: "Essai gratuit",
+    id: "free",
+    name: "Gratuit",
     price: "Gratuit",
     period: "",
-    description: "Pour tester la plateforme avant de vous engager. Limites strictes.",
+    description: "Pour découvrir SamaDepot. Idéal pour une petite école.",
     cta: "Commencer gratuitement",
     ctaHref: "/#inscrire",
     highlight: false,
+    badge: null,
     features: [
-      { label: "2 professeurs", included: true },
-      { label: "30 étudiants", included: true },
-      { label: "3 espaces de dépôt", included: true },
-      { label: "1 Go de stockage", included: true },
+      { label: "10 professeurs", included: true },
+      { label: "200 étudiants", included: true },
+      { label: "3 Go de stockage", included: true },
       { label: "Récépissés SHA-256", included: true },
       { label: "Suivi de classe", included: true },
       { label: "Export CSV", included: true },
@@ -36,45 +36,21 @@ const PLANS = [
     name: "Basic",
     price: "15 000",
     period: "FCFA / mois",
-    description: "Pour les écoles jusqu'à 500 étudiants.",
+    description: "Pour les écoles jusqu'à 1 500 étudiants.",
     cta: "Inscrire mon université",
     ctaHref: "/#inscrire",
     highlight: true,
     badge: "Le plus populaire",
     features: [
-      { label: "15 professeurs", included: true },
-      { label: "500 étudiants", included: true },
-      { label: "50 espaces de dépôt", included: true },
-      { label: "10 Go de stockage", included: true },
+      { label: "40 professeurs", included: true },
+      { label: "1 500 étudiants", included: true },
+      { label: "20 Go de stockage", included: true },
       { label: "Récépissés SHA-256", included: true },
       { label: "Suivi de classe", included: true },
       { label: "Export CSV", included: true },
       { label: "Import CSV étudiants", included: true },
       { label: "Notifications email", included: true },
       { label: "Support par email", included: false },
-    ]
-  },
-  {
-    id: "standard",
-    name: "Standard",
-    price: "25 000",
-    period: "FCFA / mois",
-    description: "Pour les universités jusqu'à 1 500 étudiants.",
-    cta: "Inscrire mon université",
-    ctaHref: "/#inscrire",
-    highlight: false,
-    badge: "Nouveau",
-    features: [
-      { label: "40 professeurs", included: true },
-      { label: "1 500 étudiants", included: true },
-      { label: "150 espaces de dépôt", included: true },
-      { label: "30 Go de stockage", included: true },
-      { label: "Récépissés SHA-256", included: true },
-      { label: "Suivi de classe", included: true },
-      { label: "Export CSV", included: true },
-      { label: "Import CSV étudiants", included: true },
-      { label: "Notifications email", included: true },
-      { label: "Support par email", included: true },
     ]
   },
   {
@@ -86,11 +62,11 @@ const PLANS = [
     cta: "Contacter l'équipe",
     ctaHref: "mailto:contact@samadepot.app",
     highlight: false,
+    badge: null,
     features: [
       { label: "Professeurs illimités", included: true },
       { label: "Étudiants illimités", included: true },
-      { label: "Espaces illimités", included: true },
-      { label: "100 Go de stockage", included: true },
+      { label: "50 Go de stockage", included: true },
       { label: "Récépissés SHA-256", included: true },
       { label: "Suivi de classe", included: true },
       { label: "Export CSV", included: true },
@@ -159,7 +135,7 @@ export default function PricingPage() {
 
       {/* Plans */}
       <section className="mx-auto max-w-6xl px-4 pb-16 md:px-8">
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-3">
           {PLANS.map((plan) => (
             <div
               key={plan.id}

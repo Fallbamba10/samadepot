@@ -68,11 +68,10 @@ export function PlanBanner({ overview }: { overview: AdminOverview }) {
       <div className="grid gap-3 border-t border-current/10 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
         <UsageBar used={overview.totalTeachers} max={limits.maxTeachers} label="Professeurs" />
         <UsageBar used={overview.totalStudents} max={limits.maxStudents} label="Étudiants" />
-        <UsageBar used={overview.totalSpaces} max={limits.maxSpaces} label="Espaces actifs" />
         <UsageBar
           used={Math.round(storageUsedGb * 10) / 10}
           max={limits.maxStorageGb}
-          label={`Stockage (Go)`}
+          label="Stockage (Go)"
         />
       </div>
     </div>
