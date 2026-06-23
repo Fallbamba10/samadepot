@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { ArrowLeft, Download, ExternalLink, FileCheck2, Hash, Printer, ReceiptText, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ClipboardCheck, Download, ExternalLink, FileCheck2, Hash, Printer, ReceiptText, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { getCurrentUser } from "@/lib/auth";
 import { getSubmissionById } from "@/lib/data";
+
+export const dynamic = "force-dynamic";
 
 export default async function SubmissionReceiptPage({
   params
@@ -10,7 +13,11 @@ export default async function SubmissionReceiptPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const submission = await getSubmissionById(id);
+  const [submission, currentUser] = await Promise.all([
+    getSubmissionById(id),
+    getCurrentUser(),
+  ]);
+  const canReview = currentUser && ["teacher", "admin", "superadmin"].includes(currentUser.role);
 
   return (
     <AppShell active="Depots">
@@ -83,6 +90,15 @@ export default async function SubmissionReceiptPage({
                 <Download className="h-4 w-4" />
                 Telecharger
               </Link>
+              {canReview && (
+                <Link
+                  href={`/submissions/${submission.id}/review`}
+                  className="focus-ring inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-lagoon-500 px-4 text-sm font-semibold text-white transition hover:bg-lagoon-400"
+                >
+                  <ClipboardCheck className="h-4 w-4" />
+                  Évaluer ce dépôt
+                </Link>
+              )}
               <Link
                 href={`/submissions/${submission.id}/print`}
                 target="_blank"

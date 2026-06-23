@@ -619,6 +619,19 @@ export async function getSpaceTracking(spaceId: string): Promise<SpaceTracking |
     if (!subMap.has(s.student_id)) subMap.set(s.student_id, s);
   }
 
+  // Fetch reviews for all submissions in this space
+  const submissionIds = [...subMap.values()].map((s) => s.id);
+  const reviewMap = new Map<string, any>();
+  if (submissionIds.length > 0) {
+    const { data: reviews } = await supabaseAdmin
+      .from("reviews")
+      .select("submission_id,grade,grade_max,comment,decision")
+      .in("submission_id", submissionIds);
+    for (const r of reviews ?? []) {
+      reviewMap.set(r.submission_id, r);
+    }
+  }
+
   const subjectName = space.subject_id
     ? (await supabaseAdmin.from("subjects").select("name").eq("id", space.subject_id).single()).data?.name
     : undefined;
@@ -649,7 +662,9 @@ export async function getSpaceTracking(spaceId: string): Promise<SpaceTracking |
           fileName: sub.file_name,
           submittedAt: formatDate(sub.submitted_at) ?? "",
           status: sub.status,
-          grade: undefined,
+          grade: reviewMap.get(sub.id)?.grade != null
+            ? `${reviewMap.get(sub.id).grade}/${reviewMap.get(sub.id).grade_max ?? 20}`
+            : undefined,
           isLate: Boolean(sub.is_late),
           sizeMb: Number(sub.file_size_mb)
         } : undefined
