@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
-import { hasSupabaseConfig } from "@/lib/env";
 import { LoginForm } from "./login-form";
 
 export default function LoginPage() {
@@ -8,7 +7,7 @@ export default function LoginPage() {
     <main className="min-h-screen bg-canvas">
       <section className="flex min-h-screen items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
-          <LoginForm isConfigured={hasSupabaseConfig()} />
+          <LoginForm />
           <div className="mt-5 text-center">
             <Link
               href="/verify"

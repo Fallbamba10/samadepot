@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/deadline-reminder",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/expire-plans",
+      "schedule": "0 1 * * *"
     }
   ],
   "headers": [

@@ -51,10 +51,12 @@ export async function POST(request: NextRequest) {
 
   const supabaseAdmin = createSupabaseAdminClient();
 
-  // Mettre à jour le plan de l'université
+  // Mettre à jour le plan de l'université (expire dans 1 an)
+  const expiresAt = new Date();
+  expiresAt.setFullYear(expiresAt.getFullYear() + 1);
   await supabaseAdmin
     .from("universities")
-    .update({ plan })
+    .update({ plan, plan_expires_at: expiresAt.toISOString() })
     .eq("id", universityId);
 
   // Marquer la commande comme payée

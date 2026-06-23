@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { hasSupabaseConfig } from "@/lib/env";
-import {
-  createSupabaseAdminClient,
-  hasSupabaseAdminConfig
-} from "@/lib/supabase-admin";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
 export async function GET(
   request: Request,
@@ -14,11 +10,6 @@ export async function GET(
 
   if (!user) {
     return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
-  }
-
-  if (!hasSupabaseConfig() || !hasSupabaseAdminConfig()) {
-    const { id } = await params;
-    return NextResponse.redirect(new URL(`/submissions/${id}`, request.url));
   }
 
   const { id } = await params;

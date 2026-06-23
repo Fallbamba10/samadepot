@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { hasSupabaseConfig } from "@/lib/env";
-import {
-  createSupabaseAdminClient,
-  hasSupabaseAdminConfig
-} from "@/lib/supabase-admin";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { reviewSubmissionSchema } from "@/lib/validation";
 import { sendReviewNotificationEmail } from "@/lib/email";
 
@@ -41,17 +37,6 @@ export async function POST(
       { error: "Payload invalide", issues: parsed.error.flatten() },
       { status: 400 }
     );
-  }
-
-  if (!hasSupabaseConfig() || !hasSupabaseAdminConfig()) {
-    return NextResponse.json({
-      data: {
-        submissionId: id,
-        ...parsed.data,
-        status: statusByDecision[parsed.data.decision],
-        reviewedAt: new Date().toISOString()
-      }
-    });
   }
 
   const supabaseAdmin = createSupabaseAdminClient();

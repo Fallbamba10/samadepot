@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { AlertCircle, ArrowRight, CheckCircle2, Lock, Mail, X } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 
-export function LoginForm({ isConfigured }: { isConfigured: boolean }) {
+export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,11 +20,6 @@ export function LoginForm({ isConfigured }: { isConfigured: boolean }) {
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-
-    if (!isConfigured) {
-      router.push("/dashboard");
-      return;
-    }
 
     setIsLoading(true);
     const supabase = createSupabaseBrowserClient();
@@ -128,13 +123,6 @@ export function LoginForm({ isConfigured }: { isConfigured: boolean }) {
 
       <form onSubmit={onSubmit} className="rounded-2xl border border-line bg-white p-6 shadow-soft">
 
-        {!isConfigured ? (
-          <div className="mb-5 flex gap-3 rounded-xl bg-saffron-50 p-3 text-sm text-saffron-500">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            Mode démo — clique pour accéder au prototype.
-          </div>
-        ) : null}
-
         {/* Email */}
         <div className="relative">
           <label className="mb-1.5 block text-sm font-semibold text-ink" htmlFor="email">
@@ -176,7 +164,7 @@ export function LoginForm({ isConfigured }: { isConfigured: boolean }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              required={isConfigured}
+              required
               className="focus-ring h-12 w-full rounded-xl border border-line pl-10 pr-3 text-sm transition placeholder:text-muted focus:border-brand-500"
             />
           </div>
@@ -198,7 +186,7 @@ export function LoginForm({ isConfigured }: { isConfigured: boolean }) {
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
           ) : (
             <>
-              {isConfigured ? "Se connecter" : "Accéder au prototype"}
+              Se connecter
               <ArrowRight className="h-4 w-4" />
             </>
           )}
