@@ -585,7 +585,7 @@ export async function getSpaceTracking(spaceId: string): Promise<SpaceTracking |
       .eq("space_id", spaceId),
     supabaseAdmin
       .from("submissions")
-      .select("id,student_id,file_name,file_size_mb,submitted_at,status,grade,grade_max,is_late")
+      .select("id,student_id,file_name,file_size_mb,submitted_at,status,is_late")
       .eq("space_id", spaceId)
       .order("submitted_at", { ascending: false })
   ]);
@@ -649,7 +649,7 @@ export async function getSpaceTracking(spaceId: string): Promise<SpaceTracking |
           fileName: sub.file_name,
           submittedAt: formatDate(sub.submitted_at) ?? "",
           status: sub.status,
-          grade: sub.grade ? `${sub.grade}/${sub.grade_max}` : undefined,
+          grade: undefined,
           isLate: Boolean(sub.is_late),
           sizeMb: Number(sub.file_size_mb)
         } : undefined
