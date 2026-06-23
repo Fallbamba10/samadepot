@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHash } from "crypto";
 import { getCurrentUser } from "@/lib/auth";
-import { hasSupabaseConfig } from "@/lib/env";
-import { submissions } from "@/lib/mock-data";
 import {
   createSupabaseAdminClient,
   hasSupabaseAdminConfig
@@ -17,7 +15,7 @@ export async function GET() {
   }
 
   if (!hasSupabaseAdminConfig()) {
-    return NextResponse.json({ data: submissions });
+    return NextResponse.json({ data: [] });
   }
 
   const supabaseAdmin = createSupabaseAdminClient();
@@ -68,7 +66,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!hasSupabaseConfig() || !hasSupabaseAdminConfig()) {
+  if (!hasSupabaseAdminConfig()) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const hash = await sha256(buffer);
     const year = new Date().getFullYear();

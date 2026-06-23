@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, Database, Trash2, X } from "lucide-react";
+import { ArrowRight, Database, Loader2, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type UniversityRow = {
@@ -25,6 +25,8 @@ const PLAN_META: Record<string, { label: string; color: string }> = {
   premium:  { label: "Premium",  color: "bg-brand-50 text-brand-600" }
 };
 
+const PLANS = ["free", "basic", "premium"] as const;
+
 function StatMini({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-xl bg-slate-50 py-2">
@@ -35,18 +37,46 @@ function StatMini({ label, value }: { label: string; value: number }) {
 }
 
 export function UniCard({ uni, onDeleted }: { uni: UniversityRow; onDeleted: (id: string) => void }) {
+  const [currentPlan, setCurrentPlan] = useState(uni.plan);
+  const [isActive, setIsActive] = useState(uni.is_active);
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmName, setConfirmName] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [patching, setPatching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const plan = PLAN_META[uni.plan] ?? PLAN_META.free;
+  const plan = PLAN_META[currentPlan] ?? PLAN_META.free;
   const storagePct = uni.max_storage_gb > 0
     ? Math.min(100, Math.round((uni.used_storage_mb / (uni.max_storage_gb * 1024)) * 100))
     : 0;
   const storageUsed = uni.used_storage_mb >= 1024
     ? `${(uni.used_storage_mb / 1024).toFixed(1)} Go`
     : `${uni.used_storage_mb} Mo`;
+
+  async function patch(body: Record<string, unknown>) {
+    setPatching(true);
+    setError(null);
+    const res = await fetch(`/api/superadmin/universities/${uni.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const json = await res.json();
+    setPatching(false);
+    if (!res.ok) { setError(json.error ?? "Erreur"); return false; }
+    return true;
+  }
+
+  async function handlePlanChange(newPlan: string) {
+    if (newPlan === currentPlan) return;
+    const ok = await patch({ plan: newPlan });
+    if (ok) setCurrentPlan(newPlan);
+  }
+
+  async function handleToggleActive() {
+    const ok = await patch({ is_active: !isActive });
+    if (ok) setIsActive(!isActive);
+  }
 
   async function handleDelete() {
     setDeleting(true);
@@ -66,7 +96,7 @@ export function UniCard({ uni, onDeleted }: { uni: UniversityRow; onDeleted: (id
     <>
       <div className={cn(
         "flex flex-col rounded-2xl border bg-white p-5 transition hover:shadow-soft",
-        uni.is_active ? "border-line" : "border-line opacity-60"
+        isActive ? "border-line" : "border-line opacity-60"
       )}>
         {/* En-tête */}
         <div className="flex items-start justify-between gap-2">
@@ -77,7 +107,7 @@ export function UniCard({ uni, onDeleted }: { uni: UniversityRow; onDeleted: (id
             <span className={cn("rounded-full px-2.5 py-1 text-[10px] font-bold", plan.color)}>
               {plan.label}
             </span>
-            {!uni.is_active && (
+            {!isActive && (
               <span className="rounded-full bg-coral-50 px-2.5 py-1 text-[10px] font-bold text-coral-500">
                 Suspendu
               </span>
@@ -114,6 +144,30 @@ export function UniCard({ uni, onDeleted }: { uni: UniversityRow; onDeleted: (id
           </div>
         </div>
 
+        {/* Changer le plan */}
+        <div className="mt-4">
+          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-muted">Plan</p>
+          <div className="flex gap-1.5">
+            {PLANS.map((p) => (
+              <button
+                key={p}
+                onClick={() => handlePlanChange(p)}
+                disabled={patching}
+                className={cn(
+                  "flex-1 rounded-lg border py-1.5 text-[11px] font-bold transition",
+                  currentPlan === p
+                    ? "border-brand-500 bg-brand-50 text-brand-600"
+                    : "border-line bg-white text-muted hover:border-brand-300 hover:text-ink"
+                )}
+              >
+                {PLAN_META[p]?.label ?? p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {error && <p className="mt-2 text-[11px] text-coral-500">{error}</p>}
+
         {/* Actions */}
         <div className="mt-4 flex gap-2">
           <Link
@@ -124,6 +178,19 @@ export function UniCard({ uni, onDeleted }: { uni: UniversityRow; onDeleted: (id
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <button
+            onClick={handleToggleActive}
+            disabled={patching}
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-xs font-bold transition",
+              isActive
+                ? "border-saffron-200 text-saffron-500 hover:bg-saffron-50"
+                : "border-brand-200 text-brand-500 hover:bg-brand-50"
+            )}
+            title={isActive ? "Suspendre" : "Réactiver"}
+          >
+            {patching ? <Loader2 className="h-4 w-4 animate-spin" /> : isActive ? "⏸" : "▶"}
+          </button>
+          <button
             onClick={() => setShowConfirm(true)}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-coral-200 text-coral-400 transition hover:bg-coral-50 hover:text-coral-500"
             title="Supprimer l'université"
@@ -133,7 +200,7 @@ export function UniCard({ uni, onDeleted }: { uni: UniversityRow; onDeleted: (id
         </div>
       </div>
 
-      {/* Modal de confirmation */}
+      {/* Modal de confirmation suppression */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl border border-line bg-white shadow-xl">
