@@ -600,15 +600,17 @@ export async function getSpaceTracking(spaceId: string): Promise<SpaceTracking |
   if (classIds.length > 0) {
     const { data: memberships } = await supabaseAdmin
       .from("class_students")
-      .select("student_id,users(id,full_name,student_number)")
+      .select("student_id")
       .in("class_id", classIds);
-    const seen = new Set<string>();
-    for (const m of memberships ?? []) {
-      const u = Array.isArray(m.users) ? m.users[0] : m.users;
-      if (u && !seen.has(u.id)) {
-        seen.add(u.id);
-        allStudents.push(u);
-      }
+
+    const studentIds = [...new Set((memberships ?? []).map((m: any) => m.student_id as string))];
+
+    if (studentIds.length > 0) {
+      const { data: userRows } = await supabaseAdmin
+        .from("users")
+        .select("id,full_name,student_number")
+        .in("id", studentIds);
+      allStudents = userRows ?? [];
     }
   }
 
