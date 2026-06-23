@@ -315,17 +315,27 @@ export async function getSubmissionById(id: string): Promise<Submission> {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("v_submissions_full")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const supabaseAdmin = createSupabaseAdminClient();
+
+  const [{ data, error }, { data: spaceRow }] = await Promise.all([
+    supabase.from("v_submissions_full").select("*").eq("id", id).single(),
+    supabaseAdmin
+      .from("submissions")
+      .select("space_id, submission_spaces(allow_resubmit)")
+      .eq("id", id)
+      .single(),
+  ]);
 
   if (error || !data) {
     notFound();
   }
 
-  return mapSubmission(data);
+  const spaceData = spaceRow?.submission_spaces;
+  const allowResubmit = spaceData
+    ? Boolean((Array.isArray(spaceData) ? spaceData[0] : spaceData)?.allow_resubmit)
+    : true;
+
+  return { ...mapSubmission(data), spaceId: spaceRow?.space_id ?? "", allowResubmit };
 }
 
 export async function getAdminOverview(): Promise<AdminOverview> {
@@ -536,6 +546,7 @@ function getDeadlineStatus(value: string) {
 function mapSubmission(submission: any): Submission {
   return {
     id: submission.id,
+    spaceId: submission.space_id ?? "",
     student: submission.student_name ?? "Etudiant",
     studentEmail: submission.student_email ?? undefined,
     studentNumber: submission.student_number ?? undefined,

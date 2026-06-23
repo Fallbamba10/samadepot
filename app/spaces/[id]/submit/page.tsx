@@ -6,11 +6,14 @@ import { getSpaces } from "@/lib/data";
 import { SubmitForm } from "./submit-form";
 
 export default async function SubmitPage({
-  params
+  params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ resubmit?: string }>;
 }) {
   const { id } = await params;
+  const { resubmit } = await searchParams;
   const spaces = await getSpaces();
   const space = spaces.find((item) => item.id === id);
 
@@ -53,6 +56,7 @@ export default async function SubmitPage({
         <SubmitForm
           spaceId={space.id}
           space={{ id: space.id, formats: space.formats, maxSizeMb: space.maxSizeMb }}
+          parentId={resubmit}
         />
       </div>
     </AppShell>

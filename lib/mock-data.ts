@@ -75,6 +75,7 @@ export const spaces: SubmissionSpace[] = [
 export const submissions: Submission[] = [
   {
     id: "SD-2026-00421",
+    spaceId: "mock-space-1",
     student: "Aminata Fall",
     studentEmail: "aminata.fall@ucad.edu.sn",
     studentNumber: "2021-INFO-0421",
@@ -91,6 +92,7 @@ export const submissions: Submission[] = [
   },
   {
     id: "SD-2026-00420",
+    spaceId: "mock-space-2",
     student: "Moussa Sarr",
     studentEmail: "moussa.sarr@ucad.edu.sn",
     studentNumber: "2021-GES-0220",
@@ -109,6 +111,7 @@ export const submissions: Submission[] = [
   },
   {
     id: "SD-2026-00419",
+    spaceId: "mock-space-1",
     student: "Khadija Sow",
     studentEmail: "khadija.sow@ucad.edu.sn",
     studentNumber: "2022-INFO-0119",

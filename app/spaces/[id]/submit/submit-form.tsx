@@ -10,6 +10,7 @@ import {
   FileUp,
   Hash,
   Loader2,
+  RefreshCw,
   Share2,
   Upload,
   X
@@ -28,7 +29,7 @@ type SubmitResult = {
   file_hash?: string;
 };
 
-export function SubmitForm({ spaceId, space }: { spaceId: string; space: SpaceInfo }) {
+export function SubmitForm({ spaceId, space, parentId }: { spaceId: string; space: SpaceInfo; parentId?: string }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -38,6 +39,7 @@ export function SubmitForm({ spaceId, space }: { spaceId: string; space: SpaceIn
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SubmitResult | null>(null);
+  const isResubmit = Boolean(parentId);
 
   function validateAndSetFile(f: File) {
     setError(null);
@@ -84,6 +86,7 @@ export function SubmitForm({ spaceId, space }: { spaceId: string; space: SpaceIn
     const formData = new FormData();
     formData.append("spaceId", spaceId);
     formData.append("file", file);
+    if (parentId) formData.append("parentId", parentId);
     if (comment.trim()) formData.append("studentComment", comment.trim());
 
     // XHR pour vraie barre de progression
@@ -192,12 +195,20 @@ export function SubmitForm({ spaceId, space }: { spaceId: string; space: SpaceIn
       onSubmit={onSubmit}
       className="rounded-lg border border-line bg-white p-4 shadow-line"
     >
+      {isResubmit && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-saffron-50 px-3 py-2 text-sm font-semibold text-saffron-700">
+          <RefreshCw className="h-4 w-4 shrink-0" />
+          Nouvelle version — corrections demandées par le professeur
+        </div>
+      )}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-50 text-brand-600">
           <FileUp className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-sm font-bold text-ink">Déposer mon fichier</h2>
+          <h2 className="text-sm font-bold text-ink">
+            {isResubmit ? "Déposer la version corrigée" : "Déposer mon fichier"}
+          </h2>
           <p className="text-xs text-muted">
             Horodaté, hashé SHA-256 et stocké dans un bucket privé.
           </p>

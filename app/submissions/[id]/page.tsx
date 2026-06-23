@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ClipboardCheck, Download, ExternalLink, FileCheck2, Hash, Printer, ReceiptText, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ClipboardCheck, Download, ExternalLink, FileCheck2, Hash, Printer, ReceiptText, RefreshCw, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getCurrentUser } from "@/lib/auth";
@@ -97,6 +97,15 @@ export default async function SubmissionReceiptPage({
                 >
                   <ClipboardCheck className="h-4 w-4" />
                   Évaluer ce dépôt
+                </Link>
+              )}
+              {!canReview && submission.status === "returned" && submission.allowResubmit && (
+                <Link
+                  href={`/spaces/${submission.spaceId}/submit?resubmit=${submission.id}`}
+                  className="focus-ring inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-saffron-500 px-4 text-sm font-semibold text-white transition hover:bg-saffron-400"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Déposer une nouvelle version
                 </Link>
               )}
               <Link

@@ -33,6 +33,7 @@ export async function POST(request: Request) {
 
   const formData = await request.formData();
   const spaceId = String(formData.get("spaceId") ?? "");
+  const parentId = optionalString(formData.get("parentId"));
   const studentComment = optionalString(formData.get("studentComment"));
   const file = formData.get("file");
 
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
   const supabaseAdmin = createSupabaseAdminClient();
   const { data: space, error: spaceError } = await supabaseAdmin
     .from("submission_spaces")
-    .select("id,university_id,teacher_id,title,type,deadline,formats_allowed,max_size_mb,allow_late,is_active")
+    .select("id,university_id,teacher_id,title,type,deadline,formats_allowed,max_size_mb,allow_late,allow_resubmit,is_active")
     .eq("id", spaceId)
     .single();
 
@@ -104,6 +105,26 @@ export async function POST(request: Request) {
     );
   }
 
+  // Vérifier si c'est une resoumission
+  let nextVersion = 1;
+  if (parentId) {
+    if (!space.allow_resubmit) {
+      return NextResponse.json({ error: "La resoumission n'est pas autorisée pour cet espace" }, { status: 400 });
+    }
+    const { data: parent } = await supabaseAdmin
+      .from("submissions")
+      .select("id,version,status,student_id")
+      .eq("id", parentId)
+      .single();
+    if (!parent || parent.student_id !== currentUser.id) {
+      return NextResponse.json({ error: "Dépôt original introuvable" }, { status: 404 });
+    }
+    if (parent.status !== "returned") {
+      return NextResponse.json({ error: "Seuls les dépôts retournés peuvent être soumis à nouveau" }, { status: 400 });
+    }
+    nextVersion = (parent.version ?? 1) + 1;
+  }
+
   const submittedAt = new Date();
   const deadline = new Date(space.deadline);
   const isLate = submittedAt > deadline;
@@ -138,6 +159,8 @@ export async function POST(request: Request) {
       space_id: space.id,
       student_id: currentUser.id,
       university_id: space.university_id,
+      parent_id: parentId ?? null,
+      version: nextVersion,
       file_name: file.name,
       file_url: storagePath,
       file_size_mb: sizeMb,

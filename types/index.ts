@@ -30,6 +30,7 @@ export type SubmissionSpace = {
 
 export type Submission = {
   id: string;
+  spaceId: string;
   student: string;
   studentEmail?: string;
   studentNumber?: string;
@@ -47,6 +48,7 @@ export type Submission = {
   reviewedAt?: string;
   version?: number;
   isLate?: boolean;
+  allowResubmit?: boolean;
 };
 
 export type Stat = {
