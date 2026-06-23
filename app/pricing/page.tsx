@@ -11,24 +11,24 @@ import {
 const PLANS = [
   {
     id: "starter",
-    name: "Starter",
+    name: "Essai gratuit",
     price: "Gratuit",
     period: "",
-    description: "Pour découvrir SamaDepot. Parfait pour une école qui démarre.",
+    description: "Pour tester la plateforme avant de vous engager. Limites strictes.",
     cta: "Commencer gratuitement",
     ctaHref: "/#inscrire",
     highlight: false,
     features: [
-      { label: "5 professeurs", included: true },
-      { label: "200 étudiants", included: true },
-      { label: "5 Go de stockage", included: true },
-      { label: "Espaces de dépôt illimités", included: true },
+      { label: "2 professeurs", included: true },
+      { label: "30 étudiants", included: true },
+      { label: "3 espaces de dépôt", included: true },
+      { label: "1 Go de stockage", included: true },
       { label: "Récépissés SHA-256", included: true },
       { label: "Suivi de classe", included: true },
       { label: "Export CSV", included: true },
       { label: "Import CSV étudiants", included: false },
-      { label: "Notifications email étudiants", included: false },
-      { label: "Support prioritaire", included: false },
+      { label: "Notifications email", included: false },
+      { label: "Support", included: false },
     ]
   },
   {
@@ -36,22 +36,45 @@ const PLANS = [
     name: "Basic",
     price: "15 000",
     period: "FCFA / mois",
-    description: "Pour les petites et moyennes universités avec un usage régulier.",
+    description: "Pour les écoles jusqu'à 500 étudiants.",
     cta: "Inscrire mon université",
     ctaHref: "/#inscrire",
     highlight: true,
     badge: "Le plus populaire",
     features: [
-      { label: "30 professeurs", included: true },
-      { label: "1 000 étudiants", included: true },
-      { label: "20 Go de stockage", included: true },
-      { label: "Espaces de dépôt illimités", included: true },
+      { label: "15 professeurs", included: true },
+      { label: "500 étudiants", included: true },
+      { label: "50 espaces de dépôt", included: true },
+      { label: "10 Go de stockage", included: true },
       { label: "Récépissés SHA-256", included: true },
       { label: "Suivi de classe", included: true },
       { label: "Export CSV", included: true },
       { label: "Import CSV étudiants", included: true },
-      { label: "Notifications email étudiants", included: true },
-      { label: "Support prioritaire", included: false },
+      { label: "Notifications email", included: true },
+      { label: "Support par email", included: false },
+    ]
+  },
+  {
+    id: "standard",
+    name: "Standard",
+    price: "25 000",
+    period: "FCFA / mois",
+    description: "Pour les universités jusqu'à 1 500 étudiants.",
+    cta: "Inscrire mon université",
+    ctaHref: "/#inscrire",
+    highlight: false,
+    badge: "Nouveau",
+    features: [
+      { label: "40 professeurs", included: true },
+      { label: "1 500 étudiants", included: true },
+      { label: "150 espaces de dépôt", included: true },
+      { label: "30 Go de stockage", included: true },
+      { label: "Récépissés SHA-256", included: true },
+      { label: "Suivi de classe", included: true },
+      { label: "Export CSV", included: true },
+      { label: "Import CSV étudiants", included: true },
+      { label: "Notifications email", included: true },
+      { label: "Support par email", included: true },
     ]
   },
   {
@@ -59,20 +82,20 @@ const PLANS = [
     name: "Premium",
     price: "35 000",
     period: "FCFA / mois",
-    description: "Pour les grandes universités avec des besoins avancés.",
+    description: "Pour les grandes universités, sans aucune limite.",
     cta: "Contacter l'équipe",
     ctaHref: "mailto:contact@samadepot.app",
     highlight: false,
     features: [
       { label: "Professeurs illimités", included: true },
       { label: "Étudiants illimités", included: true },
+      { label: "Espaces illimités", included: true },
       { label: "100 Go de stockage", included: true },
-      { label: "Espaces de dépôt illimités", included: true },
       { label: "Récépissés SHA-256", included: true },
       { label: "Suivi de classe", included: true },
       { label: "Export CSV", included: true },
       { label: "Import CSV étudiants", included: true },
-      { label: "Notifications email étudiants", included: true },
+      { label: "Notifications email", included: true },
       { label: "Support prioritaire", included: true },
     ]
   }
@@ -80,8 +103,8 @@ const PLANS = [
 
 const FAQ = [
   {
-    q: "Est-ce vraiment gratuit pour commencer ?",
-    a: "Oui. Le plan Starter est gratuit sans limite de temps. Pas de carte bancaire, pas d'engagement. Vous passez au plan Basic ou Premium quand vous avez besoin de plus."
+    q: "À quoi sert l'essai gratuit ?",
+    a: "L'essai gratuit vous permet de tester la plateforme avec 2 profs et 30 étudiants. C'est suffisant pour évaluer toutes les fonctionnalités avant de vous engager. Pour un usage réel, choisissez le plan Basic."
   },
   {
     q: "Comment fonctionne le paiement ?",
@@ -136,7 +159,7 @@ export default function PricingPage() {
 
       {/* Plans */}
       <section className="mx-auto max-w-6xl px-4 pb-16 md:px-8">
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
