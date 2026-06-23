@@ -121,10 +121,10 @@ export async function POST(
     new_value: { status: nextStatus, decision: parsed.data.decision }
   });
 
-  // Email à l'étudiant en arrière-plan
+  // Notification in-app + email à l'étudiant en arrière-plan
   void supabaseAdmin
     .from("submissions")
-    .select("student_id,file_name,submission_spaces(title)")
+    .select("student_id,file_name,university_id,submission_spaces(title)")
     .eq("id", id)
     .single()
     .then(async ({ data: sub }) => {
@@ -132,6 +132,38 @@ export async function POST(
       const spaceTitle = Array.isArray(sub.submission_spaces)
         ? (sub.submission_spaces[0] as any)?.title
         : (sub.submission_spaces as any)?.title ?? "Dépôt";
+
+      const notifTypeMap: Record<string, string> = {
+        validate: "submission_validated",
+        grade: "submission_graded",
+        return: "submission_returned",
+        reject: "submission_rejected",
+      };
+      const notifTitleMap: Record<string, string> = {
+        validate: `Dépôt validé — ${spaceTitle}`,
+        grade: `Dépôt noté — ${spaceTitle}`,
+        return: `Dépôt retourné — ${spaceTitle}`,
+        reject: `Dépôt rejeté — ${spaceTitle}`,
+      };
+      const notifBodyMap: Record<string, string> = {
+        validate: `Votre dépôt a été validé par ${user.fullName}.`,
+        grade: `Vous avez reçu la note ${parsed.data.grade}/20 de ${user.fullName}.`,
+        return: `Votre dépôt a été retourné par ${user.fullName}. Corrections demandées.`,
+        reject: `Votre dépôt a été rejeté par ${user.fullName}.`,
+      };
+
+      // Notification in-app
+      await supabaseAdmin.from("notifications").insert({
+        user_id: sub.student_id,
+        university_id: sub.university_id,
+        type: notifTypeMap[parsed.data.decision],
+        title: notifTitleMap[parsed.data.decision],
+        body: notifBodyMap[parsed.data.decision],
+        link: `/submissions/${id}`,
+        is_read: false,
+      }).then(() => null, () => null);
+
+      // Email
       const { data: student } = await supabaseAdmin
         .from("users")
         .select("email,full_name")

@@ -155,21 +155,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: submissionError.message }, { status: 400 });
   }
 
-  // Notifie le prof par email en arrière-plan
+  // Notifie le prof (email + notification in-app) en arrière-plan
+  const teacherId = (space as any).teacher_id as string | undefined;
+  const spaceTitle = (space as any).title ?? space.id;
+  const submissionId = (submission as any).id as string;
+
   void supabaseAdmin
     .from("users")
     .select("email,full_name")
-    .eq("id", (space as any).teacher_id)
+    .eq("id", teacherId ?? "")
     .single()
-    .then(({ data: teacher }) => {
+    .then(async ({ data: teacher }) => {
+      // Notification in-app pour le prof
+      if (teacherId) {
+        await supabaseAdmin.from("notifications").insert({
+          user_id: teacherId,
+          university_id: space.university_id,
+          type: "submission_received",
+          title: `Nouveau dépôt — ${spaceTitle}`,
+          body: `${currentUser.fullName} vient de déposer ${file.name}.`,
+          link: `/submissions/${submissionId}`,
+          is_read: false,
+        }).then(() => null, () => null);
+      }
+      // Email
       if (teacher?.email) {
         return sendSubmissionReceivedEmail({
           teacherEmail: teacher.email,
           teacherName: teacher.full_name ?? "Professeur",
           studentName: currentUser.fullName,
-          spaceTitle: (space as any).title ?? space.id,
+          spaceTitle,
           spaceType: (space as any).type ?? "",
-          submissionId: (submission as any).id,
+          submissionId,
           fileName: file.name,
           submittedAt: new Date().toLocaleString("fr-FR"),
           isLate: Boolean(isLate)
