@@ -79,8 +79,8 @@ const PLANS = [
 
 const FAQ = [
   {
-    q: "À quoi sert l'essai gratuit ?",
-    a: "L'essai gratuit vous permet de tester la plateforme avec 2 profs et 30 étudiants. C'est suffisant pour évaluer toutes les fonctionnalités avant de vous engager. Pour un usage réel, choisissez le plan Basic."
+    q: "Que comprend le plan Gratuit ?",
+    a: "Le plan Gratuit inclut 10 professeurs, 200 étudiants et 3 Go de stockage. C'est suffisant pour une petite institution ou pour évaluer toutes les fonctionnalités avant de s'engager sur un plan payant."
   },
   {
     q: "Comment fonctionne le paiement ?",

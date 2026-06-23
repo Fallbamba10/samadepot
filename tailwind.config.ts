@@ -33,6 +33,15 @@ const config: Config = {
           500: "#E5484D"
         }
       },
+      animation: {
+        marquee: "marquee 30s linear infinite",
+      },
+      keyframes: {
+        marquee: {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+      },
       boxShadow: {
         soft: "0 18px 50px rgba(17, 24, 39, 0.08)",
         line: "0 0 0 1px rgba(221, 227, 234, 0.9)"

@@ -1,4 +1,4 @@
-export type PlanId = "free" | "basic" | "standard" | "premium";
+export type PlanId = "free" | "basic" | "premium";
 
 export type PlanLimits = {
   maxTeachers: number;
@@ -9,7 +9,7 @@ export type PlanLimits = {
   priceFcfa: number | null;
 };
 
-export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
+export const PLAN_LIMITS: Record<PlanId | "standard", PlanLimits> = {
   free: {
     label: "Gratuit",
     priceFcfa: null,

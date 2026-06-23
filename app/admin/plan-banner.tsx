@@ -1,11 +1,13 @@
-import Link from "next/link";
-import { ArrowRight, Zap } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { ArrowRight, Loader2, Zap } from "lucide-react";
 import { getPlanLimits } from "@/lib/plans";
 import type { AdminOverview } from "@/types";
 
 function UsageBar({ used, max, label }: { used: number; max: number; label: string }) {
-  const pct = max >= 99_999 ? 0 : Math.min(100, Math.round((used / max) * 100));
   const isUnlimited = max >= 99_999;
+  const pct = isUnlimited ? 0 : Math.min(100, Math.round((used / max) * 100));
   const isNearLimit = pct >= 80;
   const color = isNearLimit ? "bg-coral-500" : "bg-brand-500";
 
@@ -26,6 +28,16 @@ function UsageBar({ used, max, label }: { used: number; max: number; label: stri
   );
 }
 
+const NEXT_PLAN: Record<string, "basic" | "premium"> = {
+  free: "basic",
+  basic: "premium",
+};
+
+const NEXT_PLAN_LABEL: Record<string, string> = {
+  free: "Passer au plan Basic — 15 000 FCFA/mois",
+  basic: "Passer au plan Premium — 35 000 FCFA/mois",
+};
+
 export function PlanBanner({ overview }: { overview: AdminOverview }) {
   const limits = getPlanLimits(overview.plan);
   const storageUsedGb = overview.usedStorageMb / 1024;
@@ -35,11 +47,37 @@ export function PlanBanner({ overview }: { overview: AdminOverview }) {
     overview.totalStudents / limits.maxStudents >= 0.8 ||
     storagePct >= 80;
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const nextPlan = NEXT_PLAN[overview.plan];
+
+  async function handleUpgrade() {
+    if (!nextPlan) return;
+    setLoading(true);
+    setError(null);
+
+    const res = await fetch("/api/payment/initiate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan: nextPlan }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "Une erreur est survenue.");
+      setLoading(false);
+      return;
+    }
+
+    const { redirectUrl } = await res.json();
+    window.location.href = redirectUrl;
+  }
+
   const planColors: Record<string, string> = {
-    free: "border-slate-200 bg-slate-50",
-    basic: "border-brand-100 bg-brand-50",
-    standard: "border-lagoon-100 bg-lagoon-50",
-    premium: "border-saffron-100 bg-saffron-50",
+    free:    "border-slate-200 bg-slate-50",
+    basic:   "border-brand-100 bg-brand-50",
+    premium: "border-saffron-50 bg-saffron-50",
   };
 
   return (
@@ -54,18 +92,22 @@ export function PlanBanner({ overview }: { overview: AdminOverview }) {
             </span>
           )}
         </div>
-        {overview.plan !== "premium" && (
-          <Link
-            href="/pricing"
-            className="flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-brand-500"
+        {nextPlan && (
+          <button
+            onClick={handleUpgrade}
+            disabled={loading}
+            className="flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-brand-500 disabled:opacity-60"
           >
-            Passer au plan supérieur
-            <ArrowRight className="h-3 w-3" />
-          </Link>
+            {loading
+              ? <Loader2 className="h-3 w-3 animate-spin" />
+              : <ArrowRight className="h-3 w-3" />
+            }
+            {loading ? "Redirection…" : NEXT_PLAN_LABEL[overview.plan]}
+          </button>
         )}
       </div>
 
-      <div className="grid gap-3 border-t border-current/10 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 border-t border-current/10 px-5 py-4 sm:grid-cols-3">
         <UsageBar used={overview.totalTeachers} max={limits.maxTeachers} label="Professeurs" />
         <UsageBar used={overview.totalStudents} max={limits.maxStudents} label="Étudiants" />
         <UsageBar
@@ -74,6 +116,12 @@ export function PlanBanner({ overview }: { overview: AdminOverview }) {
           label="Stockage (Go)"
         />
       </div>
+
+      {error && (
+        <div className="border-t border-current/10 px-5 py-3 text-xs font-semibold text-coral-500">
+          {error}
+        </div>
+      )}
     </div>
   );
 }
