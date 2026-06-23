@@ -15,7 +15,30 @@ export async function GET() {
   if (!currentUser) {
     return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
   }
-  return NextResponse.json({ data: submissions });
+
+  if (!hasSupabaseAdminConfig()) {
+    return NextResponse.json({ data: submissions });
+  }
+
+  const supabaseAdmin = createSupabaseAdminClient();
+  const query = supabaseAdmin
+    .from("v_submissions_full")
+    .select("*")
+    .order("submitted_at", { ascending: false })
+    .limit(50);
+
+  if (currentUser.role === "student") {
+    query.eq("student_id", currentUser.id);
+  } else if (currentUser.role === "teacher") {
+    query.eq("teacher_id", currentUser.id);
+  } else if (currentUser.role === "admin") {
+    query.eq("university_id", currentUser.universityId);
+  }
+
+  const { data, error } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ data: data ?? [] });
 }
 
 export async function POST(request: Request) {
