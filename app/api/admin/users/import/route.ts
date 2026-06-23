@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { createSupabaseAdminClient, hasSupabaseAdminConfig } from "@/lib/supabase-admin";
+import { getPlanLimits } from "@/lib/plans";
 
 type ImportRow = {
   fullName: string;
@@ -35,6 +36,22 @@ export async function POST(request: Request) {
 
   const supabaseAdmin = createSupabaseAdminClient();
   const universityId = currentUser.universityId;
+
+  // L'import CSV est réservé aux plans Basic et Premium
+  if (currentUser.role !== "superadmin") {
+    const { data: uni } = await supabaseAdmin
+      .from("universities")
+      .select("plan")
+      .eq("id", universityId)
+      .single();
+    const limits = getPlanLimits(uni?.plan ?? "free");
+    if (limits.priceFcfa === null) {
+      return NextResponse.json(
+        { error: "L'import CSV est disponible à partir du plan Basic." },
+        { status: 403 }
+      );
+    }
+  }
 
   const results: { email: string; status: "created" | "skipped" | "error"; message?: string }[] = [];
 

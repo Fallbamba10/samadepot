@@ -71,7 +71,6 @@ export async function initiatePayment({
   }
 
   const data = await res.json();
-  console.log("[PayTech] response:", JSON.stringify(data));
 
   if (data.success !== 1 || !data.redirect_url) {
     return { success: false, error: data.error ?? "Réponse PayTech invalide." };

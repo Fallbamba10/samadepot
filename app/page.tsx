@@ -549,8 +549,12 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-10 border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
-            © 2026 SamaDepot · Tous droits réservés
+          <div className="mt-10 flex flex-col items-center gap-2 border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
+            <div className="flex gap-4">
+              <Link href="/terms" className="hover:text-brand-600">Conditions d'utilisation</Link>
+              <Link href="/privacy" className="hover:text-brand-600">Confidentialité</Link>
+            </div>
+            <p>© 2026 SamaDepot · Tous droits réservés</p>
           </div>
         </div>
       </footer>

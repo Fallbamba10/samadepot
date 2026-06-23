@@ -8,6 +8,7 @@ import {
   hasSupabaseAdminConfig
 } from "@/lib/supabase-admin";
 import { sendSubmissionReceivedEmail } from "@/lib/email";
+import { checkPlanLimit } from "@/lib/plans";
 
 export async function GET() {
   const currentUser = await getCurrentUser();
@@ -137,6 +138,13 @@ export async function POST(request: Request) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  // Vérifier le quota de stockage du plan avant d'uploader
+  const storageCheck = await checkPlanLimit(supabaseAdmin, space.university_id, "storage", sizeMb);
+  if (!storageCheck.allowed) {
+    return NextResponse.json({ error: storageCheck.error }, { status: 403 });
+  }
+
   const hash = await sha256(buffer);
   const safeName = file.name.replace(/[^a-zA-Z0-9_.-]/g, "_");
   const storagePath = `${space.university_id}/${space.id}/${currentUser.id}/${crypto.randomUUID()}-${safeName}`;
