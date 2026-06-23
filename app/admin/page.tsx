@@ -5,6 +5,7 @@ import {
   Building2,
   GraduationCap,
   Settings,
+  Shield,
   Users
 } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
@@ -14,6 +15,7 @@ import {
   getAdminDashboard,
   getAdminOverview,
   getAdminUsers,
+  getAuditLogs,
 } from "@/lib/data";
 import { AcademicManagement } from "./academic-management";
 import { AdminDashboardSection } from "./admin-dashboard-section";
@@ -24,15 +26,17 @@ import { UserManagement } from "./user-management";
 import { ImportCsvButton } from "@/components/import-csv-button";
 import { InviteClassButton } from "@/components/invite-class-button";
 import { InviteTeacherButton } from "@/components/invite-teacher-button";
+import { AuditLogsSection } from "./audit-logs-section";
 
 export default async function AdminPage() {
-  const [currentUser, overview, users, academicOptions, dashboardData] =
+  const [currentUser, overview, users, academicOptions, dashboardData, auditLogs] =
     await Promise.all([
       getCurrentUser(),
       getAdminOverview(),
       getAdminUsers(),
       getAcademicOptions(),
       getAdminDashboard(),
+      getAuditLogs(50),
     ]);
 
   return (
@@ -147,6 +151,12 @@ export default async function AdminPage() {
       <section className="mb-10">
         <SectionHeader icon={<Activity className="h-4 w-4" />} title="Activité en cours" />
         <AdminDashboardSection data={dashboardData} />
+      </section>
+
+      {/* ─── SECTION 4 : JOURNAL D'AUDIT ─────────────────────────────────────── */}
+      <section className="mb-10">
+        <SectionHeader icon={<Shield className="h-4 w-4" />} title="Journal d'audit" />
+        <AuditLogsSection logs={auditLogs} />
       </section>
     </AppShell>
   );

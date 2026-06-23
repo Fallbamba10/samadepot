@@ -828,6 +828,45 @@ export async function getNotifications(): Promise<Notification[]> {
   }));
 }
 
+export type AuditLog = {
+  id: string;
+  action: string;
+  resourceType: string | null;
+  resourceId: string | null;
+  actorName: string;
+  actorEmail: string;
+  createdAt: string;
+};
+
+export async function getAuditLogs(limit = 50): Promise<AuditLog[]> {
+  if (!hasSupabaseConfig() || !hasSupabaseAdminConfig()) return [];
+
+  const currentUser = await getCurrentUser();
+  if (!currentUser || !["admin", "superadmin"].includes(currentUser.role)) return [];
+
+  const supabaseAdmin = createSupabaseAdminClient();
+
+  const { data } = await supabaseAdmin
+    .from("audit_logs")
+    .select("id,action,resource_type,resource_id,created_at,users(full_name,email)")
+    .eq("university_id", currentUser.universityId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  return (data ?? []).map((row: any) => {
+    const actor = Array.isArray(row.users) ? row.users[0] : row.users;
+    return {
+      id: row.id,
+      action: row.action,
+      resourceType: row.resource_type ?? null,
+      resourceId: row.resource_id ?? null,
+      actorName: actor?.full_name ?? "Système",
+      actorEmail: actor?.email ?? "",
+      createdAt: row.created_at,
+    };
+  });
+}
+
 export async function markNotificationsRead(ids: string[]): Promise<void> {
   if (!hasSupabaseConfig()) return;
   const supabase = await createSupabaseServerClient();
