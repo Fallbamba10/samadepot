@@ -130,6 +130,50 @@ export async function sendWelcomeEmail(opts: {
   });
 }
 
+// ── Email : préavis d'expiration de plan (pour l'admin) ──────────────────
+export async function sendPlanExpiryWarningEmail(opts: {
+  adminEmail: string;
+  adminName: string;
+  universityName: string;
+  plan: string;
+  expiresAt: string;
+  daysLeft: number;
+}) {
+  if (!hasEmailConfig()) return;
+  const resend = getResend();
+  const link = `${getSiteUrl()}/pricing`;
+
+  const planLabels: Record<string, string> = {
+    basic: "Basic", premium: "Premium", standard: "Standard"
+  };
+  const planLabel = planLabels[opts.plan] ?? opts.plan;
+
+  await resend.emails.send({
+    from: FROM,
+    to: opts.adminEmail,
+    subject: `⚠️ Votre abonnement ${planLabel} expire dans ${opts.daysLeft} jour${opts.daysLeft > 1 ? "s" : ""} — SamaDepot`,
+    html: emailTemplate({
+      title: `Abonnement ${planLabel} bientôt expiré`,
+      preheader: `Renouvelez avant le ${opts.expiresAt} pour garder vos fonctionnalités`,
+      body: `
+        <p>Bonjour ${opts.adminName},</p>
+        <p>Votre abonnement <strong>${planLabel}</strong> pour <strong>${opts.universityName}</strong> expire le <strong>${opts.expiresAt}</strong>.</p>
+        <div style="margin:20px 0;padding:16px 20px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;">
+          <p style="margin:0;font-size:14px;font-weight:700;color:#c2410c">
+            ⚠️ Plus que ${opts.daysLeft} jour${opts.daysLeft > 1 ? "s" : ""} pour renouveler
+          </p>
+          <p style="margin:8px 0 0;font-size:13px;color:#92400e">
+            Sans renouvellement, votre compte sera automatiquement rétrogradé vers le plan Gratuit et certaines fonctionnalités seront désactivées.
+          </p>
+        </div>
+        <p style="font-size:14px;color:#475569">Renouvelez en quelques clics depuis votre tableau de bord.</p>
+      `,
+      ctaLabel: "Renouveler mon abonnement",
+      ctaUrl: link
+    })
+  });
+}
+
 // ── Template HTML ─────────────────────────────────────────────────────────
 function emailTemplate(opts: {
   title: string;
