@@ -66,6 +66,7 @@ export type AdminOverview = {
   usedStorageMb: number;
   maxStorageGb: number;
   universityName: string;
+  plan: string;
 };
 
 export type AdminUser = {

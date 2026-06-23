@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getSpaces } from "@/lib/data";
 import { hasSupabaseConfig, getSiteUrl } from "@/lib/env";
+import { checkPlanLimit } from "@/lib/plans";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createSpaceSchema } from "@/lib/validation";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -161,6 +163,16 @@ export async function POST(request: Request) {
   }
 
   const input = parsed.data;
+
+  // Vérification limite du plan
+  if (currentUser.role !== "superadmin") {
+    const adminClient = createSupabaseAdminClient();
+    const limitCheck = await checkPlanLimit(adminClient, currentUser.universityId, "spaces");
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ error: limitCheck.error, upgrade: limitCheck.upgrade }, { status: 403 });
+    }
+  }
+
   const supabase = await createSupabaseServerClient();
   const insertPayload = {
     university_id: currentUser.universityId,

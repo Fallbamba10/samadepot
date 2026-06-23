@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { checkPlanLimit } from "@/lib/plans";
 import {
   createSupabaseAdminClient,
   hasSupabaseAdminConfig
@@ -43,6 +44,16 @@ export async function POST(request: Request) {
   }
 
   const supabaseAdmin = createSupabaseAdminClient();
+
+  // Vérification limite du plan
+  if (currentUser.role !== "superadmin" && ["teacher", "student"].includes(input.role)) {
+    const checkType = input.role === "teacher" ? "teachers" : "students";
+    const limitCheck = await checkPlanLimit(supabaseAdmin, input.universityId, checkType);
+    if (!limitCheck.allowed) {
+      return NextResponse.json({ error: limitCheck.error, upgrade: limitCheck.upgrade }, { status: 403 });
+    }
+  }
+
   const password =
     input.temporaryPassword ?? crypto.randomUUID().replaceAll("-", "").slice(0, 14);
 

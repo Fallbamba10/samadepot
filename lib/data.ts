@@ -347,7 +347,8 @@ export async function getAdminOverview(): Promise<AdminOverview> {
       totalSpaces: 0,
       usedStorageMb: 3800,
       maxStorageGb: 20,
-      universityName: "UCAD Dakar"
+      universityName: "UCAD Dakar",
+      plan: "free"
     };
   }
 
@@ -366,7 +367,8 @@ export async function getAdminOverview(): Promise<AdminOverview> {
       totalSpaces: 0,
       usedStorageMb: 0,
       maxStorageGb: 0,
-      universityName: "Universite"
+      universityName: "Universite",
+      plan: "free"
     };
   }
 
@@ -380,7 +382,8 @@ export async function getAdminOverview(): Promise<AdminOverview> {
     totalSpaces: Number(data.total_spaces ?? 0),
     usedStorageMb: Number(data.used_storage_mb ?? 0),
     maxStorageGb: Number(data.max_storage_gb ?? 0),
-    universityName: data.name ?? "Universite"
+    universityName: data.name ?? "Universite",
+    plan: data.plan ?? "free"
   };
 }
 

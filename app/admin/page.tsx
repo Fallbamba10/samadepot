@@ -17,6 +17,7 @@ import {
 } from "@/lib/data";
 import { AcademicManagement } from "./academic-management";
 import { AdminDashboardSection } from "./admin-dashboard-section";
+import { PlanBanner } from "./plan-banner";
 import { CreateUserForm } from "./create-user-form";
 import { OnboardingBanner } from "./onboarding-banner";
 import { UserManagement } from "./user-management";
@@ -53,6 +54,9 @@ export default async function AdminPage() {
           </p>
         </div>
       </div>
+
+      {/* Bandeau plan & quotas */}
+      <PlanBanner overview={overview} />
 
       {/* Onboarding — visible seulement si la plateforme est vierge */}
       <OnboardingBanner
