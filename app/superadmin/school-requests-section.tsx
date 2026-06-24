@@ -60,7 +60,7 @@ function CopyButton({ value }: { value: string }) {
 
 // ── Modal identifiants (montée au niveau section = survit aux démontages) ────
 function CredentialsModal({ creds, onClose }: { creds: ApprovedCredentials; onClose: () => void }) {
-  const loginUrl = "https://samadepot.vercel.app/login";
+  const loginUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/login`;
   const whatsappText = encodeURIComponent(
     `Bonjour ${creds.universityName} 👋\n\nVotre école est maintenant active sur SamaDepot !\n\n` +
     `🔗 Lien : ${loginUrl}\n` +
@@ -117,7 +117,7 @@ function CredentialsModal({ creds, onClose }: { creds: ApprovedCredentials; onCl
             <div>
               <p className="mb-1 text-[11px] text-muted">Lien de connexion</p>
               <div className="flex items-center justify-between rounded-lg border border-line bg-white px-3 py-2.5">
-                <span className="text-sm text-ink">samadepot.vercel.app/login</span>
+                <span className="text-sm text-ink">{loginUrl}</span>
                 <CopyButton value={loginUrl} />
               </div>
             </div>

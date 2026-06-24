@@ -19,8 +19,8 @@ export default function TermsPage() {
           SamaDepot est une plateforme SaaS de dépôt et de suivi de travaux universitaires,
           éditée par Mouhamadou Bamba Fall, basé à Dakar, Sénégal. Les présentes conditions
           régissent l'accès et l'utilisation de la plateforme accessible à l'adresse{" "}
-          <a href="https://samadepot.vercel.app" className="text-brand-600 hover:underline">
-            samadepot.vercel.app
+          <a href="https://samadepot.app" className="text-brand-600 hover:underline">
+            samadepot.app
           </a>.
         </p>
       </Section>

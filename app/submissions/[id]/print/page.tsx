@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getSubmissionById } from "@/lib/data";
+import { getSiteUrl } from "@/lib/env";
 
 export default async function SubmissionPrintPage({
   params,
@@ -162,7 +163,7 @@ export default async function SubmissionPrintPage({
           <div style={{ borderTop: "1px solid #f1f5f9", paddingTop: 16, fontSize: 11, color: "#94a3b8", lineHeight: 1.6 }}>
             Ce document est un récépissé électronique généré automatiquement par la plateforme SamaDepot.
             L&apos;empreinte SHA-256 ci-dessus permet de vérifier l&apos;intégrité du fichier déposé.
-            Pour vérification publique : samadepot.vercel.app/verify?id={s.id}
+            Pour vérification publique : {getSiteUrl()}/verify?id={s.id}
           </div>
         </div>
       </div>
